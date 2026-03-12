@@ -53,6 +53,7 @@ const GLOBAL_CSS = `
     .facil-leads-table-wrap { display:none !important; }
     .facil-leads-cards { display:flex !important; flex-direction:column; gap:8px; }
     .prov-dash-charts { grid-template-columns:1fr !important; }
+    .prov-grid-3col { grid-template-columns:1fr !important; }
     .facil-charts { grid-template-columns:1fr !important; }
     .facil-analytics-row { grid-template-columns:1fr !important; }
     .home-search-box { padding:13px 50px 13px 18px !important; font-size:14px !important; }
@@ -493,9 +494,8 @@ function BecomeProviderPage({ setPage }) {
 function FacilitatorModal({ onClose, clinic }) {
   const [f, setF] = useState({
     name:"", email:"", phone:"",
-    procedure: clinic?.procedures?.[0] || "",
-    country: clinic?.country || "",
-    clinic: clinic?.name || "",
+    procedure:"",
+    country:"",
     message:""
   });
   const [done, setDone] = useState(false);
@@ -504,8 +504,6 @@ function FacilitatorModal({ onClose, clinic }) {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
-
-  const hasClinic = !!clinic;
 
   return (
     <div onClick={e=>{ if(e.target===e.currentTarget) onClose(); }} style={{ position:"fixed", inset:0, background:"rgba(10,20,30,.55)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:600, padding:16, backdropFilter:"blur(3px)" }}>
@@ -529,54 +527,11 @@ function FacilitatorModal({ onClose, clinic }) {
             </div>
           ) : (
             <>
-              {/* Clinic context banner */}
-              {hasClinic && (
-                <div className="fade-up" style={{ background:`linear-gradient(120deg,${C.purpleLt},${C.tealLt})`, border:`1px solid ${C.teal}30`, borderRadius:12, padding:"12px 14px", marginBottom:18, display:"flex", gap:10, alignItems:"center" }}>
-                  <div style={{ width:36, height:36, borderRadius:9, background:C.teal, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:11, fontWeight:800, color:"#fff" }}>{clinic.image}</div>
-                  <div>
-                    <div style={{ fontWeight:700, fontSize:13 }}>{clinic.name}</div>
-                    <div style={{ fontSize:11.5, color:C.textMd }}>{clinic.city}, {clinic.country} {clinic.flag}</div>
-                  </div>
-                </div>
-              )}
-
               <FieldInput label="Full Name *" type="text" value={f.name} onChange={e=>setF(p=>({...p,name:e.target.value}))} placeholder="Your full name" />
               <FieldInput label="Email *" type="email" value={f.email} onChange={e=>setF(p=>({...p,email:e.target.value}))} placeholder="you@example.com" />
               <FieldInput label="Phone Number" type="tel" value={f.phone} onChange={e=>setF(p=>({...p,phone:e.target.value}))} placeholder="+1 416-555-0000" />
-
-              {/* Procedure — chips if clinic context, free text otherwise */}
-              {hasClinic ? (
-                <div style={{ marginBottom:14 }}>
-                  <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:8 }}>Procedure *</label>
-                  <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-                    {clinic.procedures.map(p=>(
-                      <button key={p} onClick={()=>setF(prev=>({...prev,procedure:p}))}
-                        style={{ padding:"7px 14px", border:`1.5px solid ${f.procedure===p?C.teal:C.border}`, borderRadius:20, background:f.procedure===p?C.tealLt:C.white, color:f.procedure===p?C.teal:C.textSm, fontSize:12.5, fontWeight:f.procedure===p?700:400, cursor:"pointer", fontFamily:"inherit", transition:"all .12s" }}>
-                        {p}
-                      </button>
-                    ))}
-                  </div>
-                  {f.procedure && <div style={{ marginTop:7, fontSize:11.5, color:C.teal, fontWeight:600 }}>✓ Selected: {f.procedure}</div>}
-                </div>
-              ) : (
-                <FieldInput label="What procedure are you interested in? *" type="text" value={f.procedure} onChange={e=>setF(p=>({...p,procedure:e.target.value}))} placeholder="e.g. Hair transplant, Dental implants, Knee replacement" />
-              )}
-
-              {/* Country — locked if clinic context */}
-              <div style={{ marginBottom:14 }}>
-                <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:5 }}>
-                  Preferred country or region {hasClinic ? "" : "(optional)"}
-                </label>
-                <div style={{ position:"relative" }}>
-                  <input type="text" value={f.country} onChange={e=>!hasClinic&&setF(p=>({...p,country:e.target.value}))}
-                    readOnly={hasClinic}
-                    placeholder="e.g. Turkey, Southeast Asia, Europe"
-                    style={{ width:"100%", padding:"10px 13px", border:`1.5px solid ${hasClinic?C.teal:C.border}`, borderRadius:9, fontSize:14, outline:"none", fontFamily:"inherit", color:C.text, background:hasClinic?C.tealLt:C.white, cursor:hasClinic?"default":"text" }}
-                    onFocus={e=>{ if(!hasClinic) e.target.style.borderColor=C.teal; }}
-                    onBlur={e=>{ if(!hasClinic) e.target.style.borderColor=C.border; }}/>
-                  {hasClinic && <span style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", fontSize:11, color:C.teal, fontWeight:700 }}>🔒</span>}
-                </div>
-              </div>
+              <FieldInput label="Procedure *" type="text" value={f.procedure} onChange={e=>setF(p=>({...p,procedure:e.target.value}))} placeholder="e.g. Hair transplant, Dental implants, Knee replacement" />
+              <FieldInput label="Preferred country or region (optional)" type="text" value={f.country} onChange={e=>setF(p=>({...p,country:e.target.value}))} placeholder="e.g. Turkey, Southeast Asia, Europe" />
 
               <div style={{ marginBottom:14 }}>
                 <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:5 }}>Short message (optional)</label>
@@ -878,7 +833,7 @@ function DirectoryPage({ setPage, setSelectedProvider }) {
   filtered=[...filtered.filter(p=>p.contracted), ...filtered.filter(p=>!p.contracted)];
 
   return (
-    <div style={{ maxWidth:1000, margin:"0 auto", padding:"28px 16px" }}>
+    <div style={{ maxWidth:1100, margin:"0 auto", padding:"28px 16px" }}>
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20, flexWrap:"wrap", gap:10 }}>
         <div>
           <h1 style={{ fontSize:22, fontWeight:800, marginBottom:2 }}>Provider Directory</h1>
@@ -899,9 +854,40 @@ function DirectoryPage({ setPage, setSelectedProvider }) {
         {[{l:"Any",v:0},{l:"4+",v:4},{l:"4.5+",v:4.5},{l:"4.8+",v:4.8}].map(r=><Chip key={r.l} label={r.l} active={minRating===r.v} onClick={()=>setMinRating(r.v)}/>)}
       </div>
       <p style={{ fontSize:12.5, color:C.textSm, marginBottom:14 }}>{filtered.length} provider{filtered.length!==1?"s":""} found</p>
-      <div style={{ display:"grid", gap:9 }}>
-        {filtered.map(p=><ProviderCard key={p.id} provider={p} onClick={prov=>setSelectedProvider(prov)}/>)}
-        {filtered.length===0&&<div style={{ textAlign:"center", padding:48, color:C.textSm, background:C.gray, borderRadius:14 }}>No providers found. Adjust your filters.</div>}
+      <div className="prov-grid-3col" style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:14 }}>
+        {filtered.map(p=>(
+          <div key={p.id} className="card" onClick={()=>setSelectedProvider(p)} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"20px", cursor:"pointer", boxShadow:"0 1px 4px rgba(0,0,0,.05)", display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
+            <div>
+              <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:10 }}>
+                <div style={{ width:48, height:48, borderRadius:12, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:15, color:C.teal, flexShrink:0, border:`1px solid ${C.tealLt}` }}>{p.image}</div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
+                    <span style={{ fontWeight:700, fontSize:14.5 }}>{p.name}</span>
+                    {p.contracted && <span style={{ display:"inline-flex", alignItems:"center", gap:3, background:C.amberLt, color:"#B45309", fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:20, letterSpacing:.3 }}>Featured</span>}
+                  </div>
+                  <div style={{ color:C.textSm, fontSize:12.5 }}>{p.specialty}</div>
+                </div>
+              </div>
+              <div style={{ display:"flex", gap:6, alignItems:"center", fontSize:12, color:C.textSm, marginBottom:10 }}>
+                <span style={{ color:C.amber }}>★ {p.rating}</span>
+                <span>· {p.reviews} reviews</span>
+                <span>· {p.distance}km</span>
+              </div>
+              <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:14 }}>
+                {p.tags.map(t=><span key={t} style={{ background:C.tealLt, color:C.teal, fontSize:11, fontWeight:600, padding:"3px 10px", borderRadius:10 }}>{t}</span>)}
+              </div>
+              <div style={{ fontSize:12, color:C.textSm, marginBottom:14 }}>
+                {p.address} · {p.hours}
+              </div>
+            </div>
+            {p.contracted ? (
+              <button className="btn-primary" style={{ width:"100%", padding:"10px", border:"none", borderRadius:22, background:C.teal, color:"#fff", fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Book Appointment</button>
+            ) : (
+              <button className="btn-ghost" style={{ width:"100%", padding:"10px", border:`1.5px solid ${C.border}`, borderRadius:22, background:C.white, color:C.textMd, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Request Info</button>
+            )}
+          </div>
+        ))}
+        {filtered.length===0&&<div style={{ gridColumn:"1 / -1", textAlign:"center", padding:48, color:C.textSm, background:C.gray, borderRadius:14 }}>No providers found. Adjust your filters.</div>}
       </div>
     </div>
   );
