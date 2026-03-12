@@ -45,10 +45,23 @@ const GLOBAL_CSS = `
   @media (max-width:700px) {
     .nav-desktop { display:none !important; }
     .hamburger { display:flex !important; }
+    .home-feature-grid { grid-template-columns:1fr !important; }
+    .home-feature-card { flex-direction:row !important; text-align:left !important; padding:16px !important; }
+    .home-feature-icon { width:40px !important; height:40px !important; flex-shrink:0; }
+    .home-feature-card > div:last-child { text-align:left !important; }
+    .dash-stats { grid-template-columns:repeat(2,1fr) !important; }
+    .facil-leads-table-wrap { display:none !important; }
+    .facil-leads-cards { display:flex !important; flex-direction:column; gap:8px; }
+    .prov-dash-charts { grid-template-columns:1fr !important; }
+    .facil-charts { grid-template-columns:1fr !important; }
+    .facil-analytics-row { grid-template-columns:1fr !important; }
+    .home-search-box { padding:13px 50px 13px 18px !important; font-size:14px !important; }
+    .home-chips span, .home-chips button { font-size:11px !important; padding:5px 12px !important; }
   }
   @media (min-width:701px) {
     .hamburger { display:none !important; }
     .mobile-menu-panel { display:none !important; }
+    .facil-leads-cards { display:none !important; }
   }
 `;
 
@@ -121,6 +134,17 @@ const INIT_EVENTS = [
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
+function useIsMobile() {
+  const [mobile, setMobile] = useState(() => window.innerWidth <= 700);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 700px)");
+    const h = (e) => setMobile(e.matches);
+    mq.addEventListener("change", h);
+    return () => mq.removeEventListener("change", h);
+  }, []);
+  return mobile;
+}
+
 function Badge({ children, color = C.teal, bg = C.tealLt, small }) {
   return <span style={{ background:bg, color, fontSize:small?9:10, fontWeight:700, padding:small?"1px 6px":"2px 9px", borderRadius:20, letterSpacing:.4, whiteSpace:"nowrap" }}>{children}</span>;
 }
@@ -228,13 +252,42 @@ function FieldInput({ label, type, value, onChange, placeholder, hint, right }) 
   );
 }
 
-// Role Selector — shown at top of login/signup
+// Role Selector — card style with icons + descriptions
 function RoleSelector({ role, setRole }) {
+  const roles = [
+    {
+      val: "patient",
+      label: "I'm a Patient",
+      desc: "Find care, book appointments, explore options abroad",
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+      ),
+    },
+    {
+      val: "provider",
+      label: "I'm a Provider",
+      desc: "List your clinic, accept bookings, grow your practice",
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+        </svg>
+      ),
+    },
+  ];
   return (
-    <div style={{ display:"flex", gap:10, marginBottom:22 }}>
-      {[{val:"patient",label:"I'm a Patient"},{val:"provider",label:"I'm a Provider"}].map(r=>(
-        <button key={r.val} onClick={()=>setRole(r.val)} style={{ flex:1, padding:"14px 10px", border:`2px solid ${role===r.val?C.teal:C.border}`, borderRadius:14, background:role===r.val?C.tealLt:C.white, cursor:"pointer", fontFamily:"inherit", transition:"all .18s", display:"flex", alignItems:"center", justifyContent:"center" }}>
-          <span style={{ fontSize:13, fontWeight:700, color:role===r.val?C.teal:C.textMd }}>{r.label}</span>
+    <div style={{ display:"flex", gap:12, marginBottom:22 }}>
+      {roles.map(r => (
+        <button key={r.val} onClick={()=>setRole(r.val)}
+          style={{ flex:1, padding:"18px 12px 16px", border:`2px solid ${role===r.val?C.teal:C.border}`, borderRadius:16, background:role===r.val?C.tealLt:C.white, cursor:"pointer", fontFamily:"inherit", transition:"all .18s", display:"flex", flexDirection:"column", alignItems:"center", gap:10, textAlign:"center" }}>
+          <div style={{ width:44, height:44, borderRadius:"50%", background:role===r.val?C.white:C.gray, display:"flex", alignItems:"center", justifyContent:"center", color:role===r.val?C.teal:C.textSm, transition:"all .18s" }}>
+            {r.icon}
+          </div>
+          <div>
+            <div style={{ fontSize:13.5, fontWeight:700, color:role===r.val?C.teal:C.text, marginBottom:4 }}>{r.label}</div>
+            <div style={{ fontSize:11.5, color:C.textSm, lineHeight:1.5 }}>{r.desc}</div>
+          </div>
         </button>
       ))}
     </div>
@@ -249,25 +302,28 @@ function LoginPage({ setPage }) {
     <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
       <div className="fade-up" style={{ width:"100%", maxWidth:400, background:C.white, borderRadius:20, padding:"36px 30px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
         <div style={{ textAlign:"center", marginBottom:24 }}>
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style={{ marginBottom:10 }}>
-            <circle cx="15" cy="15" r="10" stroke="#047598" strokeWidth="3.2"/>
-            <line x1="22" y1="22" x2="32" y2="32" stroke="#047598" strokeWidth="3.2" strokeLinecap="round"/>
-          </svg>
-          <h2 style={{ fontSize:20, fontWeight:800, color:C.text, marginBottom:4 }}>Sign In</h2>
+         
+          <h2 style={{ fontSize:22, fontWeight:800, color:C.text, marginBottom:4 }}>Sign In</h2>
           <p style={{ color:C.textSm, fontSize:13 }}>Sign in to your Hospital.com account</p>
         </div>
-        <RoleSelector role={role} setRole={setRole}/>
+        {/* Pill role toggle */}
+        <div style={{ display:"flex", gap:10, marginBottom:24 }}>
+          {[{val:"patient",label:"I'm a Patient"},{val:"provider",label:"I'm a Provider"}].map(r=>(
+            <button key={r.val} onClick={()=>setRole(r.val)} style={{ flex:1, padding:"12px 10px", border:`2px solid ${role===r.val?C.teal:C.border}`, borderRadius:50, background:role===r.val?C.tealLt:C.white, cursor:"pointer", fontFamily:"inherit", transition:"all .18s", fontSize:13.5, fontWeight:700, color:role===r.val?C.teal:C.textMd }}>
+              {r.label}
+            </button>
+          ))}
+        </div>
         <SocialBtn letter="G" label="Continue with Google" />
         <SocialBtn letter="A" label="Continue with Apple" />
-        <SocialBtn letter="f" label="Continue with Facebook" />
-        <div style={{ display:"flex", alignItems:"center", gap:10, margin:"16px 0" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10, margin:"14px 0" }}>
           <div style={{ flex:1, height:1, background:C.border }}/><span style={{ fontSize:11, color:C.textSm, fontWeight:600, whiteSpace:"nowrap" }}>or with email</span><div style={{ flex:1, height:1, background:C.border }}/>
         </div>
         <FieldInput label="Email" type="email" value={f.email} onChange={e=>setF(p=>({...p,email:e.target.value}))} placeholder="you@example.com" />
         <FieldInput label="Password" type={show?"text":"password"} value={f.pw} onChange={e=>setF(p=>({...p,pw:e.target.value}))} placeholder="••••••••"
           hint={<button onClick={()=>{}} style={{ background:"none", border:"none", fontSize:12, color:C.teal, cursor:"pointer", fontWeight:600, fontFamily:"inherit" }}>Forgot?</button>}
           right={<button onClick={()=>setShow(s=>!s)} style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", fontSize:11, color:C.textSm, fontWeight:700, fontFamily:"inherit" }}>{show?"Hide":"Show"}</button>} />
-        <button className="btn-primary" onClick={()=>setPage("home")} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:10, padding:"12px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Sign In as {role==="patient"?"Patient":"Provider"}</button>
+        <button className="btn-primary" onClick={()=>setPage("home")} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"13px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Sign In as {role==="patient"?"Patient":"Provider"}</button>
         <p style={{ textAlign:"center", fontSize:13, color:C.textSm, marginTop:18 }}>No account?{" "}<button onClick={()=>setPage("signup")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>Sign Up</button></p>
       </div>
     </div>
@@ -275,45 +331,65 @@ function LoginPage({ setPage }) {
 }
 
 function SignupPage({ setPage }) {
+  const [step, setStep] = useState(0); // 0 = pick role, 1 = fill form
   const [role, setRole] = useState("patient");
-  // Patient state
   const [f, setF] = useState({ name:"", email:"", pw:"" });
   const [show, setShow] = useState(false);
-  // Provider state
   const [pf, setPf] = useState({ clinicName:"", specialty:"", location:"", email:"", phone:"" });
   const [providerDone, setProviderDone] = useState(false);
 
-  if (role === "provider") {
-    if (providerDone) {
-      return (
-        <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
-          <div className="fade-up" style={{ width:"100%", maxWidth:460, background:C.white, borderRadius:20, padding:"40px 34px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)", textAlign:"center" }}>
-            <div style={{ width:56, height:56, borderRadius:"50%", background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px" }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2.5"><polyline points="20,6 9,17 4,12"/></svg>
-            </div>
-            <h2 style={{ fontSize:21, fontWeight:800, marginBottom:10 }}>Application Submitted!</h2>
-            <p style={{ color:C.textSm, fontSize:14, lineHeight:1.6, marginBottom:22 }}>Thank you for your interest in joining Hospital.com as a provider. Our admin team will review your application and your profile will go live once approved.</p>
-            <div style={{ background:C.amberLt, border:`1px solid #FDE68A`, borderRadius:12, padding:"13px 16px", marginBottom:24, textAlign:"left" }}>
-              <div style={{ fontSize:12, fontWeight:700, color:"#92400E", marginBottom:4 }}>Pending Admin Review</div>
-              <div style={{ fontSize:13, color:"#78350F" }}>You will be notified by email once your account is approved. This typically takes 1–2 business days.</div>
-            </div>
-            <button className="btn-primary" onClick={()=>setPage("home")} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:10, padding:"11px 32px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit" }}>Back to Home</button>
+  // Step 0 — Role picker card screen
+  if (step === 0) {
+    return (
+      <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
+        <div className="fade-up" style={{ width:"100%", maxWidth:420, background:C.white, borderRadius:22, padding:"36px 28px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
+          <div style={{ textAlign:"center", marginBottom:26 }}>
+            <h2 style={{ fontSize:22, fontWeight:800, color:C.text, marginBottom:6 }}>Create your account</h2>
+            <p style={{ color:C.textSm, fontSize:13.5 }}>Who are you signing up as?</p>
           </div>
+          <RoleSelector role={role} setRole={setRole}/>
+          <button className="btn-primary" onClick={()=>setStep(1)} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"14px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>
+            Continue as {role==="patient"?"Patient":"Provider"}
+          </button>
+          <p style={{ textAlign:"center", fontSize:13, color:C.textSm, marginTop:16 }}>Already have an account?{" "}<button onClick={()=>setPage("login")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>Sign In</button></p>
         </div>
-      );
-    }
+      </div>
+    );
+  }
+
+  // Step 1 provider — done screen
+  if (role === "provider" && providerDone) {
+    return (
+      <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
+        <div className="fade-up" style={{ width:"100%", maxWidth:460, background:C.white, borderRadius:20, padding:"40px 34px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)", textAlign:"center" }}>
+          <div style={{ width:56, height:56, borderRadius:"50%", background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px" }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+          </div>
+          <h2 style={{ fontSize:21, fontWeight:800, marginBottom:10 }}>Application Submitted!</h2>
+          <p style={{ color:C.textSm, fontSize:14, lineHeight:1.6, marginBottom:22 }}>Thank you for your interest in joining Hospital.com as a provider. Our admin team will review your application and your profile will go live once approved.</p>
+          <div style={{ background:C.amberLt, border:`1px solid #FDE68A`, borderRadius:12, padding:"13px 16px", marginBottom:24, textAlign:"left" }}>
+            <div style={{ fontSize:12, fontWeight:700, color:"#92400E", marginBottom:4 }}>Pending Admin Review</div>
+            <div style={{ fontSize:13, color:"#78350F" }}>You will be notified by email once your account is approved. This typically takes 1–2 business days.</div>
+          </div>
+          <button className="btn-primary" onClick={()=>setPage("home")} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:10, padding:"11px 32px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit" }}>Back to Home</button>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 1 provider — form
+  if (role === "provider") {
     return (
       <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
         <div className="fade-up" style={{ width:"100%", maxWidth:460, background:C.white, borderRadius:20, padding:"36px 30px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
-          <div style={{ textAlign:"center", marginBottom:24 }}>
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style={{ marginBottom:10 }}>
-              <circle cx="15" cy="15" r="10" stroke="#047598" strokeWidth="3.2"/>
-              <line x1="22" y1="22" x2="32" y2="32" stroke="#047598" strokeWidth="3.2" strokeLinecap="round"/>
-            </svg>
+          <button onClick={()=>setStep(0)} style={{ background:"none", border:"none", cursor:"pointer", color:C.textSm, fontSize:13, fontWeight:600, fontFamily:"inherit", display:"flex", alignItems:"center", gap:6, marginBottom:20, padding:0 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15,18 9,12 15,6"/></svg>
+            Back
+          </button>
+          <div style={{ textAlign:"center", marginBottom:22 }}>
             <h2 style={{ fontSize:20, fontWeight:800, color:C.text, marginBottom:4 }}>Provider Registration</h2>
             <p style={{ color:C.textSm, fontSize:13 }}>Submit your details for admin review</p>
           </div>
-          <RoleSelector role={role} setRole={setRole}/>
           <FieldInput label="Clinic / Practice Name *" type="text" value={pf.clinicName} onChange={e=>setPf(p=>({...p,clinicName:e.target.value}))} placeholder="e.g. Sunshine Medical Clinic" />
           <FieldInput label="Specialty *" type="text" value={pf.specialty} onChange={e=>setPf(p=>({...p,specialty:e.target.value}))} placeholder="e.g. Cardiology, Family Medicine" />
           <FieldInput label="Location / City *" type="text" value={pf.location} onChange={e=>setPf(p=>({...p,location:e.target.value}))} placeholder="e.g. Toronto, ON" />
@@ -322,39 +398,35 @@ function SignupPage({ setPage }) {
           <div style={{ background:C.amberLt, border:`1px solid #FDE68A`, borderRadius:10, padding:"11px 14px", marginBottom:16, fontSize:12.5, color:"#92400E" }}>
             Provider accounts require admin approval before going live.
           </div>
-          <button className="btn-primary" onClick={()=>setProviderDone(true)} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:10, padding:"12px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Submit for Review</button>
-          <p style={{ textAlign:"center", fontSize:13, color:C.textSm, marginTop:14 }}>Have an account?{" "}<button onClick={()=>setPage("login")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>Sign In</button></p>
+          <button className="btn-primary" onClick={()=>setProviderDone(true)} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"13px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Submit for Review</button>
         </div>
       </div>
     );
   }
 
-  // Patient signup
+  // Step 1 patient — form
   return (
     <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
       <div className="fade-up" style={{ width:"100%", maxWidth:400, background:C.white, borderRadius:20, padding:"36px 30px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
-        <div style={{ textAlign:"center", marginBottom:24 }}>
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style={{ marginBottom:10 }}>
-            <circle cx="15" cy="15" r="10" stroke="#047598" strokeWidth="3.2"/>
-            <line x1="22" y1="22" x2="32" y2="32" stroke="#047598" strokeWidth="3.2" strokeLinecap="round"/>
-          </svg>
-          <h2 style={{ fontSize:20, fontWeight:800, color:C.text, marginBottom:4 }}>Create account</h2>
-          <p style={{ color:C.textSm, fontSize:13 }}>Join thousands of patients and providers</p>
+        <button onClick={()=>setStep(0)} style={{ background:"none", border:"none", cursor:"pointer", color:C.textSm, fontSize:13, fontWeight:600, fontFamily:"inherit", display:"flex", alignItems:"center", gap:6, marginBottom:20, padding:0 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15,18 9,12 15,6"/></svg>
+          Back
+        </button>
+        <div style={{ textAlign:"center", marginBottom:22 }}>
+          <h2 style={{ fontSize:20, fontWeight:800, color:C.text, marginBottom:4 }}>Create your account</h2>
+          <p style={{ color:C.textSm, fontSize:13 }}>Join thousands of patients finding better care</p>
         </div>
-        <RoleSelector role={role} setRole={setRole}/>
         <SocialBtn letter="G" label="Sign up with Google" />
         <SocialBtn letter="A" label="Sign up with Apple" />
-        <SocialBtn letter="f" label="Sign up with Facebook" />
-        <div style={{ display:"flex", alignItems:"center", gap:10, margin:"16px 0" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10, margin:"14px 0" }}>
           <div style={{ flex:1, height:1, background:C.border }}/><span style={{ fontSize:11, color:C.textSm, fontWeight:600, whiteSpace:"nowrap" }}>or with email</span><div style={{ flex:1, height:1, background:C.border }}/>
         </div>
-        <FieldInput label="Full name" type="text" value={f.name} onChange={e=>setF(p=>({...p,name:e.target.value}))} placeholder="Jane Doe" />
-        <FieldInput label="Email" type="email" value={f.email} onChange={e=>setF(p=>({...p,email:e.target.value}))} placeholder="you@example.com" />
-        <FieldInput label="Password" type={show?"text":"password"} value={f.pw} onChange={e=>setF(p=>({...p,pw:e.target.value}))} placeholder="Min. 8 characters"
+        <FieldInput label="Full Name *" type="text" value={f.name} onChange={e=>setF(p=>({...p,name:e.target.value}))} placeholder="Your full name" />
+        <FieldInput label="Email *" type="email" value={f.email} onChange={e=>setF(p=>({...p,email:e.target.value}))} placeholder="you@example.com" />
+        <FieldInput label="Password *" type={show?"text":"password"} value={f.pw} onChange={e=>setF(p=>({...p,pw:e.target.value}))} placeholder="Create a password"
           right={<button onClick={()=>setShow(s=>!s)} style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", fontSize:11, color:C.textSm, fontWeight:700, fontFamily:"inherit" }}>{show?"Hide":"Show"}</button>} />
-        <button className="btn-primary" onClick={()=>setPage("home")} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:10, padding:"12px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Create Account</button>
-        <p style={{ textAlign:"center", fontSize:11, color:C.textSm, marginTop:12 }}>By signing up you agree to our Terms & Privacy Policy.</p>
-        <p style={{ textAlign:"center", fontSize:13, color:C.textSm, marginTop:10 }}>Have an account?{" "}<button onClick={()=>setPage("login")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>Sign In</button></p>
+        <button className="btn-primary" onClick={()=>setPage("home")} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"13px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Create Account</button>
+        <p style={{ textAlign:"center", fontSize:13, color:C.textSm, marginTop:16 }}>Already have an account?{" "}<button onClick={()=>setPage("login")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>Sign In</button></p>
       </div>
     </div>
   );
@@ -418,14 +490,22 @@ function BecomeProviderPage({ setPage }) {
 }
 
 // ─── FACILITATOR CONTACT FORM MODAL ──────────────────────────────────────────
-function FacilitatorModal({ onClose }) {
-  const [f, setF] = useState({ name:"", email:"", phone:"", procedure:"", country:"", message:"" });
+function FacilitatorModal({ onClose, clinic }) {
+  const [f, setF] = useState({
+    name:"", email:"", phone:"",
+    procedure: clinic?.procedures?.[0] || "",
+    country: clinic?.country || "",
+    clinic: clinic?.name || "",
+    message:""
+  });
   const [done, setDone] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
+
+  const hasClinic = !!clinic;
 
   return (
     <div onClick={e=>{ if(e.target===e.currentTarget) onClose(); }} style={{ position:"fixed", inset:0, background:"rgba(10,20,30,.55)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:600, padding:16, backdropFilter:"blur(3px)" }}>
@@ -449,11 +529,55 @@ function FacilitatorModal({ onClose }) {
             </div>
           ) : (
             <>
+              {/* Clinic context banner */}
+              {hasClinic && (
+                <div className="fade-up" style={{ background:`linear-gradient(120deg,${C.purpleLt},${C.tealLt})`, border:`1px solid ${C.teal}30`, borderRadius:12, padding:"12px 14px", marginBottom:18, display:"flex", gap:10, alignItems:"center" }}>
+                  <div style={{ width:36, height:36, borderRadius:9, background:C.teal, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:11, fontWeight:800, color:"#fff" }}>{clinic.image}</div>
+                  <div>
+                    <div style={{ fontWeight:700, fontSize:13 }}>{clinic.name}</div>
+                    <div style={{ fontSize:11.5, color:C.textMd }}>{clinic.city}, {clinic.country} {clinic.flag}</div>
+                  </div>
+                </div>
+              )}
+
               <FieldInput label="Full Name *" type="text" value={f.name} onChange={e=>setF(p=>({...p,name:e.target.value}))} placeholder="Your full name" />
               <FieldInput label="Email *" type="email" value={f.email} onChange={e=>setF(p=>({...p,email:e.target.value}))} placeholder="you@example.com" />
               <FieldInput label="Phone Number" type="tel" value={f.phone} onChange={e=>setF(p=>({...p,phone:e.target.value}))} placeholder="+1 416-555-0000" />
-              <FieldInput label="What procedure are you interested in? *" type="text" value={f.procedure} onChange={e=>setF(p=>({...p,procedure:e.target.value}))} placeholder="e.g. Hair transplant, Dental implants, Knee replacement" />
-              <FieldInput label="Preferred country or region (optional)" type="text" value={f.country} onChange={e=>setF(p=>({...p,country:e.target.value}))} placeholder="e.g. Turkey, Southeast Asia, Europe" />
+
+              {/* Procedure — chips if clinic context, free text otherwise */}
+              {hasClinic ? (
+                <div style={{ marginBottom:14 }}>
+                  <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:8 }}>Procedure *</label>
+                  <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                    {clinic.procedures.map(p=>(
+                      <button key={p} onClick={()=>setF(prev=>({...prev,procedure:p}))}
+                        style={{ padding:"7px 14px", border:`1.5px solid ${f.procedure===p?C.teal:C.border}`, borderRadius:20, background:f.procedure===p?C.tealLt:C.white, color:f.procedure===p?C.teal:C.textSm, fontSize:12.5, fontWeight:f.procedure===p?700:400, cursor:"pointer", fontFamily:"inherit", transition:"all .12s" }}>
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                  {f.procedure && <div style={{ marginTop:7, fontSize:11.5, color:C.teal, fontWeight:600 }}>✓ Selected: {f.procedure}</div>}
+                </div>
+              ) : (
+                <FieldInput label="What procedure are you interested in? *" type="text" value={f.procedure} onChange={e=>setF(p=>({...p,procedure:e.target.value}))} placeholder="e.g. Hair transplant, Dental implants, Knee replacement" />
+              )}
+
+              {/* Country — locked if clinic context */}
+              <div style={{ marginBottom:14 }}>
+                <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:5 }}>
+                  Preferred country or region {hasClinic ? "" : "(optional)"}
+                </label>
+                <div style={{ position:"relative" }}>
+                  <input type="text" value={f.country} onChange={e=>!hasClinic&&setF(p=>({...p,country:e.target.value}))}
+                    readOnly={hasClinic}
+                    placeholder="e.g. Turkey, Southeast Asia, Europe"
+                    style={{ width:"100%", padding:"10px 13px", border:`1.5px solid ${hasClinic?C.teal:C.border}`, borderRadius:9, fontSize:14, outline:"none", fontFamily:"inherit", color:C.text, background:hasClinic?C.tealLt:C.white, cursor:hasClinic?"default":"text" }}
+                    onFocus={e=>{ if(!hasClinic) e.target.style.borderColor=C.teal; }}
+                    onBlur={e=>{ if(!hasClinic) e.target.style.borderColor=C.border; }}/>
+                  {hasClinic && <span style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", fontSize:11, color:C.teal, fontWeight:700 }}>🔒</span>}
+                </div>
+              </div>
+
               <div style={{ marginBottom:14 }}>
                 <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:5 }}>Short message (optional)</label>
                 <textarea value={f.message} onChange={e=>setF(p=>({...p,message:e.target.value}))} placeholder="Any additional details or questions…" rows={3}
@@ -560,56 +684,87 @@ function Select({ value, onChange, options, placeholder, minWidth }) {
 }
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
+const FEATURE_ITEMS = [
+  { src: imgAiHealth,  alt:"AI Health Assistant", title:"AI Health Assistant", sub:"Science-based guidance",
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5ACAD6" strokeWidth="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 8v4l3 3"/></svg> },
+  { src: imgProviders, alt:"Provider Directory",   title:"Provider Directory",  sub:"Verified specialists",
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5ACAD6" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> },
+  { src: imgTourism,   alt:"Medical Tourism",      title:"Medical Tourism",     sub:"Facilitator network",
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5ACAD6" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg> },
+];
+
 function HomePage({ setPage, setInitialQuery }) {
   const [q, setQ] = useState("");
+  const isMobile = useIsMobile();
   const send = (v) => { const t=v||q; if(!t.trim())return; setInitialQuery(t); setPage("chat"); };
   const suggestions = ["Find a cardiologist","I have a headache","Hair transplant abroad","Sore throat remedies","Find a facilitator","Find care abroad"];
+
   return (
-    <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 16px", background:`linear-gradient(155deg, ${C.white} 50%, ${C.tealBg} 100%)` }}>
+    <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:isMobile?"28px 16px":"40px 16px", background:`linear-gradient(155deg, ${C.white} 50%, ${C.tealBg} 100%)` }}>
       <div className="fade-up" style={{ textAlign:"center", maxWidth:780, width:"100%", padding:"0 8px" }}>
-        <div style={{ display:"inline-flex", alignItems:"center", gap:10, marginBottom:18 }}>
-          <svg width="44" height="44" viewBox="0 0 40 40" fill="none">
+
+        {/* Logo */}
+        <div style={{ display:"inline-flex", alignItems:"center", gap:isMobile?7:10, marginBottom:isMobile?10:18 }}>
+          <svg width={isMobile?22:44} height={isMobile?22:44} viewBox="0 0 40 40" fill="none">
             <circle cx="17" cy="17" r="12" stroke="#047598" strokeWidth="3.8"/>
             <line x1="26" y1="26" x2="37" y2="37" stroke="#047598" strokeWidth="3.8" strokeLinecap="round"/>
           </svg>
-          <span style={{ fontSize:40, fontWeight:800, letterSpacing:"-0.5px" }}><span style={{ color:C.teal }}>Hospital</span><span style={{ color:"#047598", fontWeight:800 }}>.com</span></span>
+          <span style={{ fontSize:isMobile?28:40, fontWeight:800, letterSpacing:"-0.5px" }}><span style={{ color:C.teal }}>Hospital</span><span style={{ color:"#047598", fontWeight:800 }}>.com</span></span>
         </div>
-        <p style={{ color:C.textSm, fontSize:18, marginBottom:36, fontWeight:500 }}>AI-powered healthcare, right at your fingertips</p>
-        <div style={{ position:"relative", marginBottom:20 }}>
+
+        <p style={{ color:C.textSm, fontSize:isMobile?13:18, marginBottom:isMobile?24:36, fontWeight:500 }}>AI-powered healthcare, right at your fingertips</p>
+
+        {/* Search */}
+        <div style={{ position:"relative", marginBottom:16 }}>
           <input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask me any healthcare question…"
-            style={{ width:"100%", padding:"17px 60px 17px 24px", border:`1.5px solid ${C.border}`, borderRadius:40, fontSize:16, outline:"none", boxSizing:"border-box", boxShadow:"0 4px 20px rgba(0,0,0,.09)", background:C.white, fontFamily:"inherit" }}
+            style={{ width:"100%", padding:isMobile?"13px 50px 13px 18px":"17px 60px 17px 24px", border:`1.5px solid ${C.border}`, borderRadius:40, fontSize:isMobile?14:16, outline:"none", boxSizing:"border-box", boxShadow:"0 4px 20px rgba(0,0,0,.09)", background:C.white, fontFamily:"inherit" }}
             onFocus={e=>e.target.style.borderColor=C.teal} onBlur={e=>e.target.style.borderColor=C.border} />
-          <button onClick={()=>send()} style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", background:C.teal, border:"none", borderRadius:"50%", width:42, height:42, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <button onClick={()=>send()} style={{ position:"absolute", right:isMobile?8:10, top:"50%", transform:"translateY(-50%)", background:C.teal, border:"none", borderRadius:"50%", width:isMobile?36:42, height:isMobile?36:42, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
           </button>
         </div>
-        <div style={{ display:"flex", gap:7, flexWrap:"wrap", justifyContent:"center", marginBottom: 30}}>
+
+        {/* Chips */}
+        <div style={{ display:"flex", gap:7, flexWrap:"wrap", justifyContent:"center", marginBottom:isMobile?20:30 }}>
           {suggestions.map(s=>(
-            <button key={s} onClick={()=>send(s)} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:20, padding:"6px 15px", fontSize:12.5, color:C.textSm, cursor:"pointer", transition:"all .15s", fontFamily:"inherit" }}
+            <button key={s} onClick={()=>send(s)} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:20, padding:isMobile?"5px 12px":"6px 15px", fontSize:isMobile?11:12.5, color:C.textSm, cursor:"pointer", transition:"all .15s", fontFamily:"inherit" }}
               onMouseEnter={e=>{e.currentTarget.style.borderColor=C.teal;e.currentTarget.style.color=C.teal;}}
               onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.color=C.textSm;}}>{s}</button>
           ))}
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:12, maxWidth:"100%", margin:"0 auto" }}>
-          {[
-            { src: imgAiHealth,  alt:"AI Health Assistant",  title:"AI Health Assistant",  sub:"Science-based guidance" },
-            { src: imgProviders, alt:"Provider Directory",    title:"Provider Directory",   sub:"Verified specialists" },
-            { src: imgTourism,   alt:"Medical Tourism",       title:"Medical Tourism",      sub:"Facilitator network" },
-          ].map(({src,alt,title,sub})=>(
-            <div key={title} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"14px 12px", textAlign:"center" }}>
-              <div style={{ width:50, height:50, borderRadius:10, background:"transparent", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 10px", overflow:"hidden" }}>
-                <img src={src} alt={alt} onError={e=>{ e.currentTarget.style.display="none"; e.currentTarget.nextSibling.style.display="flex"; }}
-                  style={{ width:"100%", height:"100%", objectFit:"contain", borderRadius:0 }}/>
-                <div style={{ display:"none", width:"100%", height:"100%", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:2 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.textSm} strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-                  <span style={{ fontSize:9, color:C.textSm, fontWeight:600 }}>IMG</span>
+
+        {/* Feature cards — DESKTOP: 3-col grid / MOBILE: vertical list */}
+        {isMobile ? (
+          <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+            {FEATURE_ITEMS.map(({alt,title,sub,icon})=>(
+              <div key={title} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"16px", display:"flex", alignItems:"center", gap:12, textAlign:"left" }}>
+                <div style={{ width:40, height:40, borderRadius:10, background:C.tealLt, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>{icon}</div>
+                <div>
+                  <div style={{ fontWeight:700, fontSize:13 }}>{title}</div>
+                  <div style={{ fontSize:11, color:C.textSm, marginTop:2 }}>{sub}</div>
                 </div>
               </div>
-              <div style={{ fontWeight:700, fontSize:13 }}>{title}</div>
-              <div style={{ fontSize:11, color:C.textSm, marginTop:3 }}>{sub}</div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:12, maxWidth:"100%", margin:"0 auto" }}>
+            {FEATURE_ITEMS.map(({src,alt,title,sub})=>(
+              <div key={title} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"14px 12px", textAlign:"center" }}>
+                <div style={{ width:50, height:50, borderRadius:10, background:"transparent", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 10px", overflow:"hidden" }}>
+                  <img src={src} alt={alt} onError={e=>{ e.currentTarget.style.display="none"; e.currentTarget.nextSibling.style.display="flex"; }}
+                    style={{ width:"100%", height:"100%", objectFit:"contain", borderRadius:0 }}/>
+                  <div style={{ display:"none", width:"100%", height:"100%", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:2 }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.textSm} strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                    <span style={{ fontSize:9, color:C.textSm, fontWeight:600 }}>IMG</span>
+                  </div>
+                </div>
+                <div style={{ fontWeight:700, fontSize:13 }}>{title}</div>
+                <div style={{ fontSize:11, color:C.textSm, marginTop:3 }}>{sub}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div style={{ marginTop:24, borderTop:`1px solid ${C.border}`, paddingTop:18, display:"flex", gap:14, justifyContent:"center", flexWrap:"wrap" }}>
           <FooterLink onClick={()=>setPage("become-provider")}>Become a Provider</FooterLink>
           <span style={{ color:C.border }}>·</span>
@@ -845,13 +1000,25 @@ function FacilitatorsPage({ setPage, setSelectedProvider }) {
 }
 
 // ─── INTERNATIONAL PAGE ───────────────────────────────────────────────────────
+const CLINIC_GRADIENTS = [
+  "linear-gradient(135deg,#0a4a5a,#1a7a8a)",
+  "linear-gradient(135deg,#4a1a0a,#8a4a1a)",
+  "linear-gradient(135deg,#1a1a4a,#2a2a8a)",
+  "linear-gradient(135deg,#2a0a0a,#5a1a1a)",
+  "linear-gradient(135deg,#1a4a1a,#2a8a3a)",
+  "linear-gradient(135deg,#3a1a4a,#6a2a8a)",
+  "linear-gradient(135deg,#0a3a4a,#1a6a7a)",
+  "linear-gradient(135deg,#4a3a0a,#8a6a1a)",
+];
+
 function InternationalPage({ setSelectedClinic, openFacilitatorModal }) {
-  const [search, setSearch] = useState("");
   const [country, setCountry] = useState("All");
-  const [procedure, setProcedure] = useState("All");
+  const [search, setSearch] = useState("");
+  const isMobile = useIsMobile();
 
   const allCountries = ["All", ...Array.from(new Set(INTL_CLINICS.map(c=>c.country)))];
-  const allProcedures = ["All", ...Array.from(new Set(INTL_CLINICS.flatMap(c=>c.procedures)))];
+
+  const [procedure, setProcedure] = useState("All");
 
   const filtered = INTL_CLINICS.filter(c=>
     (country==="All"||c.country===country) &&
@@ -859,52 +1026,74 @@ function InternationalPage({ setSelectedClinic, openFacilitatorModal }) {
     (!search||c.name.toLowerCase().includes(search.toLowerCase())||c.country.toLowerCase().includes(search.toLowerCase())||c.procedures.some(p=>p.toLowerCase().includes(search.toLowerCase())))
   );
 
+  const allProcedures = ["All", ...Array.from(new Set(INTL_CLINICS.flatMap(c=>c.procedures)))];
+
   return (
-    <div style={{ maxWidth:1000, margin:"0 auto", padding:"28px 16px" }}>
-      <div style={{ marginBottom:26 }}>
-        <h1 style={{ fontSize:24, fontWeight:800, marginBottom:6 }}>International Clinics &amp; Hospitals</h1>
-        <p style={{ color:C.textSm, fontSize:13.5, maxWidth:640 }}>Browse internationally accredited medical facilities offering world-class procedures — often at a fraction of the cost. Our medical coordinators can help you navigate the process.</p>
-      </div>
-      {/* CTA Banner */}
-      <div style={{ background:`linear-gradient(120deg, ${C.purpleLt}, ${C.tealLt})`, border:`1px solid ${C.teal}30`, borderRadius:16, padding:"18px 22px", marginBottom:24, display:"flex", gap:16, alignItems:"center", flexWrap:"wrap" }}>
-        <div style={{ flex:1, minWidth:200 }}>
-          <div style={{ fontWeight:700, fontSize:14.5, marginBottom:4 }}>Not sure where to start?</div>
-          <div style={{ color:C.textMd, fontSize:13 }}>Our medical coordinators can help you navigate your options and find the right clinic for your needs.</div>
+    <div style={{ minHeight:"calc(100vh - 58px)", background:C.offWhite }}>
+      {/* Dark hero */}
+      <div style={{ background:"linear-gradient(135deg,#0E1C26 0%,#1a3a4a 100%)", padding:isMobile?"32px 20px":"56px 40px", textAlign:"center", color:"#fff" }}>
+        <h1 style={{ fontSize:isMobile?22:34, fontWeight:800, marginBottom:10, letterSpacing:"-.3px" }}>World-Class Care Abroad</h1>
+        <p style={{ color:"#7A8FA0", fontSize:isMobile?13:15, marginBottom:24, maxWidth:560, margin:"0 auto 24px" }}>Connect with accredited clinics in 20+ countries. Save 40–80% vs. home country costs.</p>
+        {/* Search in hero */}
+        <div style={{ position:"relative", maxWidth:560, margin:"0 auto 20px" }}>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search clinics, countries, procedures…"
+            style={{ width:"100%", padding:"13px 50px 13px 20px", border:"1.5px solid rgba(255,255,255,.15)", borderRadius:28, fontSize:14, outline:"none", fontFamily:"inherit", background:"rgba(255,255,255,.08)", color:"#fff", boxSizing:"border-box" }}
+            onFocus={e=>{e.target.style.borderColor=C.teal;e.target.style.background="rgba(255,255,255,.12)";}}
+            onBlur={e=>{e.target.style.borderColor="rgba(255,255,255,.15)";e.target.style.background="rgba(255,255,255,.08)";}}/>
+          <svg style={{ position:"absolute", right:16, top:"50%", transform:"translateY(-50%)", opacity:.5 }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </div>
-        <button className="btn-primary" onClick={openFacilitatorModal} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:22, padding:"11px 22px", fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap" }}>Talk to a Facilitator</button>
+        <button className="btn-primary" onClick={openFacilitatorModal} style={{ padding:isMobile?"11px 22px":"13px 28px", background:C.teal, color:"#fff", border:"none", borderRadius:28, fontSize:isMobile?13:14, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>Talk to a Facilitator</button>
       </div>
-      {/* Filters */}
-      <div style={{ display:"flex", gap:8, marginBottom:20, flexWrap:"wrap" }}>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search clinics, countries, procedures…" style={{ flex:1, minWidth:200, padding:"9px 15px", border:`1.5px solid ${C.border}`, borderRadius:22, fontSize:13.5, outline:"none", fontFamily:"inherit" }} onFocus={e=>e.target.style.borderColor=C.teal} onBlur={e=>e.target.style.borderColor=C.border}/>
-        <Select value={country} onChange={setCountry} minWidth={140} options={allCountries}/>
-        <Select value={procedure} onChange={setProcedure} minWidth={160} options={allProcedures}/>
+
+      {/* Filter dropdowns */}
+      <div style={{ padding:isMobile?"14px 16px 0":"20px 40px 0", display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+        <Select value={country} onChange={setCountry} minWidth={0} options={allCountries.map(c=>({value:c, label:c==="All"?"All Countries":c}))}/>
+        <Select value={procedure} onChange={setProcedure} minWidth={0} options={allProcedures.map(p=>({value:p, label:p==="All"?"All Procedures":p}))}/>
       </div>
-      <p style={{ fontSize:12.5, color:C.textSm, marginBottom:14 }}>{filtered.length} clinic{filtered.length!==1?"s":""} found</p>
-      <div style={{ display:"grid", gap:12 }}>
-        {filtered.map(clinic=>(
-          <div key={clinic.id} className="card" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:16, padding:"20px 22px", cursor:"pointer", boxShadow:"0 1px 4px rgba(0,0,0,.05)" }} onClick={()=>setSelectedClinic(clinic)}>
-            <div style={{ display:"flex", gap:16, alignItems:"flex-start", flexWrap:"wrap" }}>
-              <div style={{ width:54, height:54, borderRadius:14, background:C.purpleLt, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:16, color:C.purple, flexShrink:0 }}>{clinic.image}</div>
-              <div style={{ flex:1, minWidth:200 }}>
-                <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginBottom:4 }}>
-                  <span style={{ fontWeight:700, fontSize:16 }}>{clinic.name}</span>
-                  <span style={{ background:C.gray, color:C.textSm, fontSize:11.5, padding:"2px 10px", borderRadius:10, fontWeight:600 }}>{clinic.country}</span>
+
+      {/* Clinic grid */}
+      <div style={{ padding:isMobile?"16px":"20px 40px 48px" }}>
+        <p style={{ fontSize:12.5, color:C.textSm, marginBottom:14 }}>{filtered.length} clinic{filtered.length!==1?"s":""} found</p>
+        <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(4, 1fr)", gap:isMobile?10:16 }}>
+          {filtered.map((clinic,idx)=>(
+            <div key={clinic.id} className="card" onClick={()=>setSelectedClinic(clinic)}
+              style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, overflow:"hidden", cursor:"pointer", boxShadow:"0 1px 4px rgba(0,0,0,.05)" }}>
+              {/* Card image header */}
+              {isMobile ? (
+                <div style={{ display:"flex", alignItems:"center", gap:12, padding:"14px 14px 0" }}>
+                  <div style={{ width:48, height:48, borderRadius:12, background:CLINIC_GRADIENTS[idx%CLINIC_GRADIENTS.length], display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, fontWeight:800, color:"rgba(255,255,255,.4)", flexShrink:0 }}>{clinic.image}</div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontWeight:700, fontSize:13.5 }}>{clinic.name}</div>
+                    <div style={{ fontSize:11.5, color:C.textSm }}>{clinic.city}, {clinic.country} · {clinic.flag}</div>
+                  </div>
+                  <span style={{ background:C.tealLt, color:C.teal, fontSize:11, fontWeight:700, padding:"2px 8px", borderRadius:20, flexShrink:0 }}>★ {clinic.rating}</span>
                 </div>
-                <div style={{ color:C.textSm, fontSize:13, marginBottom:10 }}>{clinic.city}, {clinic.country}</div>
-                <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-                  {clinic.procedures.map(p=>(
-                    <span key={p} style={{ background:C.tealLt, color:C.teal, fontSize:11.5, padding:"3px 10px", borderRadius:18, fontWeight:600 }}>{p}</span>
+              ) : (
+                <div style={{ height:100, background:CLINIC_GRADIENTS[idx%CLINIC_GRADIENTS.length], display:"flex", alignItems:"center", justifyContent:"center", fontSize:28, fontWeight:800, color:"rgba(255,255,255,.25)" }}>{clinic.image}</div>
+              )}
+              <div style={{ padding:isMobile?"10px 14px 14px":"14px" }}>
+                {!isMobile&&(
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:5 }}>
+                    <div style={{ fontWeight:700, fontSize:13.5, lineHeight:1.3, flex:1, marginRight:6 }}>{clinic.name}</div>
+                    <span style={{ background:C.tealLt, color:C.teal, fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:20, flexShrink:0 }}>★ {clinic.rating}</span>
+                  </div>
+                )}
+                {!isMobile&&<div style={{ fontSize:11.5, color:C.textSm, marginBottom:10 }}>{clinic.city}, {clinic.country} {clinic.flag}</div>}
+                <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:isMobile?10:12 }}>
+                  {clinic.procedures.slice(0,2).map(p=>(
+                    <span key={p} style={{ background:C.tealLt, color:C.teal, fontSize:isMobile?10:9, padding:"2px 8px", borderRadius:18, fontWeight:600 }}>{p}</span>
                   ))}
+                  {clinic.procedures.length>2&&<span style={{ background:C.gray, color:C.textSm, fontSize:isMobile?10:9, padding:"2px 8px", borderRadius:18, fontWeight:600 }}>+{clinic.procedures.length-2}</span>}
                 </div>
-              </div>
-              <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:6, flexShrink:0 }}>
-                <div style={{ fontSize:12, color:C.amber, fontWeight:700 }}>★ {clinic.rating} <span style={{ color:C.textSm, fontWeight:400 }}>({clinic.reviews})</span></div>
-                <button className="btn-primary" onClick={e=>{e.stopPropagation();openFacilitatorModal();}} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:22, padding:"8px 16px", fontWeight:700, fontSize:12.5, cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap" }}>Get Help from a Facilitator</button>
+                <div style={{ display:"flex", gap:6 }}>
+                  <button className="btn-primary" onClick={e=>{e.stopPropagation();setSelectedClinic(clinic);}} style={{ flex:1, padding:"8px", background:C.teal, color:"#fff", border:"none", borderRadius:8, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>View Clinic</button>
+                  <button onClick={e=>{e.stopPropagation();openFacilitatorModal(clinic);}} style={{ padding:"8px 10px", background:C.white, color:C.textSm, border:`1px solid ${C.border}`, borderRadius:8, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap" }}>Get Help</button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        {filtered.length===0&&<div style={{ textAlign:"center", padding:48, color:C.textSm, background:C.gray, borderRadius:14 }}>No clinics found. Try adjusting your search or filters.</div>}
+          ))}
+          {filtered.length===0&&<div style={{ gridColumn:"1/-1", textAlign:"center", padding:48, color:C.textSm, background:C.gray, borderRadius:14 }}>No clinics found. Try adjusting your search or filters.</div>}
+        </div>
       </div>
     </div>
   );
@@ -929,7 +1118,7 @@ function InternationalClinicProfile({ clinic, onBack, openFacilitatorModal }) {
       {scrolled && (
         <div className="fade-up" style={{ position:"sticky", top:0, zIndex:100, background:`linear-gradient(120deg, ${C.purple}EE, ${C.teal}EE)`, backdropFilter:"blur(8px)", padding:"12px 20px", display:"flex", gap:14, alignItems:"center", justifyContent:"space-between", flexWrap:"wrap" }}>
           <div style={{ color:"#fff", fontSize:13.5, fontWeight:600 }}>Not sure where to start? Our medical coordinators can help you navigate your options.</div>
-          <button className="btn-primary" onClick={openFacilitatorModal} style={{ background:"#fff", color:C.teal, border:"none", borderRadius:22, padding:"9px 20px", fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap" }}>Talk to a Facilitator</button>
+          <button className="btn-primary" onClick={()=>openFacilitatorModal(clinic)} style={{ background:"#fff", color:C.teal, border:"none", borderRadius:22, padding:"9px 20px", fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap" }}>Talk to a Facilitator</button>
         </div>
       )}
       <div style={{ maxWidth:860, margin:"0 auto", padding:"32px 20px 60px" }}>
@@ -982,7 +1171,7 @@ function InternationalClinicProfile({ clinic, onBack, openFacilitatorModal }) {
           
           <h2 style={{ fontWeight:800, fontSize:20, marginBottom:10 }}>Not sure where to start?</h2>
           <p style={{ color:C.textMd, fontSize:14.5, lineHeight:1.65, maxWidth:480, margin:"0 auto 22px" }}>Our medical coordinators can help you navigate your options, compare clinics, arrange travel, and coordinate your full care journey.</p>
-          <button className="btn-primary" onClick={openFacilitatorModal} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:22, padding:"14px 32px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit" }}>Talk to a Facilitator</button>
+          <button className="btn-primary" onClick={()=>openFacilitatorModal(clinic)} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:22, padding:"14px 32px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit" }}>Talk to a Facilitator</button>
         </div>
       </div>
     </div>
@@ -1187,7 +1376,7 @@ function DemoCalendar({ events, setEvents }) {
                     <div style={{ fontSize:12, color:C.textSm, marginTop:2 }}>{ev.reason}</div>
                   </div>
                   <div style={{ display:"flex", gap:5, alignItems:"center" }}>
-                   
+                    {ev.visitApproved && <Badge bg={C.greenLt} color={C.green}>Visit Approved</Badge>}
                     <Badge bg={ev.status==="confirmed"?C.tealLt:C.amberLt} color={ev.status==="confirmed"?C.teal:C.amber}>{ev.status}</Badge>
                   </div>
                 </div>
@@ -1268,6 +1457,7 @@ const MOCK_STATS = {
 function ProviderDashboard() {
   const [tab, setTab] = useState("overview");
   const [events, setEvents] = useState(INIT_EVENTS);
+  const isMobile = useIsMobile();
   const maxV = Math.max(...MOCK_STATS.monthly.map(m=>m.v));
 
   function LeadsTab() {
@@ -1335,7 +1525,7 @@ function ProviderDashboard() {
       </div>
       {tab==="overview"&&(
         <>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(150px, 1fr))", gap:10, marginBottom:16 }}>
+          <div className="dash-stats" style={{ display:"grid", gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(auto-fit, minmax(150px, 1fr))", gap:10, marginBottom:16 }}>
             {[["Total Leads",MOCK_STATS.totalLeads,"All time"],["Visits",MOCK_STATS.visits,"This month"],["Calls",MOCK_STATS.calls,"This month"],["Bookings",MOCK_STATS.bookings,"This month"]].map(([l,v,s])=>(
               <div key={l} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"16px 18px" }}>
                 <div style={{ fontSize:28, fontWeight:800, color:C.text }}>{v}</div>
@@ -1344,7 +1534,7 @@ function ProviderDashboard() {
               </div>
             ))}
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(260px, 1fr))", gap:14 }}>
+          <div className="prov-dash-charts" style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(auto-fit, minmax(260px, 1fr))", gap:14 }}>
             <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"18px 20px" }}>
               <h3 style={{ fontWeight:700, fontSize:14, marginBottom:14 }}>Monthly Lead Volume</h3>
               <div style={{ display:"flex", gap:8, alignItems:"flex-end", height:100 }}>
@@ -1438,6 +1628,7 @@ function FacilitatorDashboard() {
   const [filterProc, setFilterProc] = useState("All");
   const [search, setSearch] = useState("");
   const [selectedLead, setSelectedLead] = useState(null);
+  const isMobile = useIsMobile();
 
   const allProcs = ["All", ...Array.from(new Set(FACIL_LEADS.map(l=>l.procedure)))];
 
@@ -1509,7 +1700,7 @@ function FacilitatorDashboard() {
       {/* ── OVERVIEW ── */}
       {tab==="overview"&&(
         <>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(150px,1fr))", gap:10, marginBottom:18 }}>
+          <div className="dash-stats" style={{ display:"grid", gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(auto-fit, minmax(150px,1fr))", gap:10, marginBottom:18 }}>
             {[
               ["Total Leads", FACIL_STATS.totalLeads, "All time"],
               ["New",         FACIL_STATS.newLeads,   "Uncontacted"],
@@ -1525,7 +1716,7 @@ function FacilitatorDashboard() {
           </div>
 
           {/* Status breakdown */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:14, marginBottom:14 }}>
+          <div className="facil-charts" style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(auto-fit,minmax(260px,1fr))", gap:14, marginBottom:14 }}>
             <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"18px 20px" }}>
               <h3 style={{ fontWeight:700, fontSize:14, marginBottom:16 }}>Lead Status</h3>
               {["New","Contacted","Converted","Closed"].map(s=>{
@@ -1627,7 +1818,7 @@ function FacilitatorDashboard() {
             </div>
           )}
 
-          <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, overflow:"auto" }}>
+          <div className="facil-leads-table-wrap" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, overflow:"auto" }}>
             <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13, minWidth:700 }}>
               <thead>
                 <tr style={{ background:C.gray }}>
@@ -1660,6 +1851,33 @@ function FacilitatorDashboard() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile card view */}
+          <div className="facil-leads-cards">
+            {visible.map(l=>(
+              <div key={l.id} onClick={()=>setSelectedLead(l)}
+                style={{ background:selectedLead?.id===l.id?C.purpleLt:C.white, border:`${selectedLead?.id===l.id?"2px":"1px"} solid ${selectedLead?.id===l.id?C.purple+"40":C.border}`, borderRadius:12, padding:"12px 14px", cursor:"pointer", transition:"background .1s" }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:5 }}>
+                  <span style={{ fontWeight:700, fontSize:13 }}>{l.name}</span>
+                  <Badge bg={STATUS_COLORS[l.status].bg} color={STATUS_COLORS[l.status].color}>{l.status}</Badge>
+                </div>
+                <div style={{ fontSize:11.5, color:C.textMd, marginBottom:2 }}>{l.procedure} · {l.country}</div>
+                <div style={{ fontSize:11, color:C.textSm }}>{l.location} · Age {l.age} · {l.gender} · {l.date}</div>
+                {selectedLead?.id===l.id&&(
+                  <div style={{ marginTop:10, borderTop:`1px solid ${C.purple}20`, paddingTop:10 }}>
+                    <div style={{ fontSize:9.5, fontWeight:700, color:C.textSm, letterSpacing:.4, marginBottom:6 }}>STATUS</div>
+                    <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
+                      {["New","Contacted","Converted","Closed"].map(s=>(
+                        <button key={s} onClick={e=>{e.stopPropagation();setLeads(ls=>ls.map(lx=>lx.id===l.id?{...lx,status:s}:lx));setSelectedLead(prev=>({...prev,status:s}));}}
+                          style={{ padding:"5px 11px", border:`1.5px solid ${selectedLead.status===s?STATUS_COLORS[s].color:C.border}`, borderRadius:16, background:selectedLead.status===s?STATUS_COLORS[s].bg:C.white, color:selectedLead.status===s?STATUS_COLORS[s].color:C.textSm, fontSize:11, fontWeight:selectedLead.status===s?700:400, cursor:"pointer", fontFamily:"inherit" }}>{s}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+            {visible.length===0&&<div style={{ textAlign:"center", padding:"40px", color:C.textSm, background:C.gray, borderRadius:12 }}>No leads match filters.</div>}
+          </div>
         </>
       )}
 
@@ -1667,7 +1885,7 @@ function FacilitatorDashboard() {
       {tab==="analytics"&&(
         <div style={{ display:"grid", gap:14 }}>
           {/* Row 1 */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:14 }}>
+          <div className="facil-analytics-row" style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(auto-fit,minmax(260px,1fr))", gap:14 }}>
 
             {/* Gender */}
             <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"20px 22px" }}>
@@ -1705,7 +1923,7 @@ function FacilitatorDashboard() {
           </div>
 
           {/* Row 2 */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:14 }}>
+          <div className="facil-analytics-row" style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(auto-fit,minmax(260px,1fr))", gap:14 }}>
 
             {/* Top locations */}
             <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"20px 22px" }}>
@@ -1773,11 +1991,12 @@ export default function App() {
   const [isFacilitatorView, setIsFacilitatorView] = useState(false);
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [showFacilitatorModal, setShowFacilitatorModal] = useState(false);
+  const [facilitatorClinic, setFacilitatorClinic] = useState(null);
 
   const openProvider = (prov) => setSelectedProvider(prov);
   const closeProvider = () => setSelectedProvider(null);
-  const openFacilitatorModal = () => setShowFacilitatorModal(true);
-  const closeFacilitatorModal = () => setShowFacilitatorModal(false);
+  const openFacilitatorModal = (clinic=null) => { setFacilitatorClinic(clinic); setShowFacilitatorModal(true); };
+  const closeFacilitatorModal = () => { setShowFacilitatorModal(false); setFacilitatorClinic(null); };
 
   return (
     <div style={{ fontFamily:"'DM Sans', sans-serif", minHeight:"100vh", background:C.offWhite, color:C.text }}>
@@ -1807,7 +2026,7 @@ export default function App() {
         </>
       )}
       {selectedProvider && <ProviderModal provider={selectedProvider} onClose={closeProvider} setBookings={setBookings}/>}
-      {showFacilitatorModal && <FacilitatorModal onClose={closeFacilitatorModal}/>}
+      {showFacilitatorModal && <FacilitatorModal onClose={closeFacilitatorModal} clinic={facilitatorClinic}/>}
     </div>
   );
 }
