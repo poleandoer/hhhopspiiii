@@ -279,7 +279,7 @@ function RoleSelector({ role, setRole }) {
   const roles = [
     {
       val: "patient",
-      label: "I'm a Patient",
+      label: "Patient",
       desc: "Find care, book appointments, explore options abroad",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -289,7 +289,7 @@ function RoleSelector({ role, setRole }) {
     },
     {
       val: "provider",
-      label: "I'm a Provider",
+      label: "Provider/Facilitator",
       desc: "List your clinic, accept bookings, grow your practice",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -328,7 +328,7 @@ function LoginPage({ setPage, onLogin }) {
           <p style={{ color:C.textSm, fontSize:13 }}>Sign in to your Hospital.com account</p>
         </div>
         <div style={{ display:"flex", gap:10, marginBottom:24 }}>
-          {[{val:"patient",label:"I'm a Patient"},{val:"provider",label:"I'm a Provider"}].map(r=>(
+          {[{val:"patient",label:"Patient"},{val:"provider",label:"Provider/Facilitator"}].map(r=>(
             <button key={r.val} onClick={()=>setRole(r.val)} style={{ flex:1, padding:"12px 10px", border:`2px solid ${role===r.val?C.teal:C.border}`, borderRadius:50, background:role===r.val?C.tealLt:C.white, cursor:"pointer", fontFamily:"inherit", transition:"all .18s", fontSize:13.5, fontWeight:700, color:role===r.val?C.teal:C.textMd }}>
               {r.label}
             </button>
