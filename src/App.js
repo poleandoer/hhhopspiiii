@@ -163,15 +163,6 @@ function Chip({ label, active, onClick, color }) {
   );
 }
 
-function FooterLink({ onClick, children }) {
-  const [h, setH] = useState(false);
-  return (
-    <button onClick={onClick} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
-      style={{ background:"none", border:"none", fontSize:12.5, color:h?C.teal:C.textSm, cursor:"pointer", fontFamily:"inherit", fontWeight:600, textDecoration:h?"underline":"none", transition:"color .15s" }}>
-      {children}
-    </button>
-  );
-}
 
 // ─── BOOKMARK ICON ────────────────────────────────────────────────────────────
 function BookmarkIcon({ filled, size = 18 }) {
