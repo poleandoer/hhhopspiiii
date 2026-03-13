@@ -487,9 +487,9 @@ function BecomeProviderPage({ setPage }) {
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))", gap:14, marginBottom:44 }}>
           {[
-            { icon:"→", title:"Targeted Reach", desc:"Get discovered by patients actively searching for your specialty in your city." },
-            { icon:"→", title:"Seamless Bookings", desc:"Integrated calendar lets patients book directly — reducing admin overhead for your team." },
-            { icon:"→", title:"Real-Time Analytics", desc:"Track visits, calls, and bookings from your provider dashboard. Pay only for the leads you receive." },
+            { icon:"", title:"Targeted Reach", desc:"Get discovered by patients actively searching for your specialty in your city." },
+            { icon:"", title:"Seamless Bookings", desc:"Integrated calendar lets patients book directly — reducing admin overhead for your team." },
+            { icon:"", title:"Real-Time Analytics", desc:"Track visits, calls, and bookings from your provider dashboard. Pay only for the leads you receive." },
           ].map(b => (
             <div key={b.title} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:16, padding:"22px 20px", boxShadow:"0 1px 6px rgba(0,0,0,.05)" }}>
               <div style={{ fontWeight:800, fontSize:13, color:C.teal, marginBottom:12, letterSpacing:1 }}>{b.icon}</div>
@@ -1993,7 +1993,7 @@ function FacilitatorDashboard() {
           <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, overflow:"hidden" }}>
             <div style={{ padding:"14px 18px", borderBottom:`1px solid ${C.border}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
               <h3 style={{ fontWeight:700, fontSize:14 }}>Recent Requests</h3>
-              <button onClick={()=>setTab("leads")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, fontSize:12.5, cursor:"pointer", fontFamily:"inherit" }}>View all →</button>
+              <button onClick={()=>setTab("leads")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, fontSize:12.5, cursor:"pointer", fontFamily:"inherit" }}>View all </button>
             </div>
             <div style={{ overflowX:"auto" }}>
               <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13, minWidth:520 }}>
