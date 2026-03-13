@@ -23,7 +23,9 @@ const GLOBAL_CSS = `
   @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
   @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+  @keyframes slideInLeft { from{transform:translateX(-100%);opacity:0} to{transform:translateX(0);opacity:1} }
   .fade-up { animation: fadeUp .22s ease forwards; }
+  .slide-in-left { animation: slideInLeft .25s ease forwards; }
   .nav-link { position:relative; font-size:13.5px; font-weight:500; cursor:pointer; padding:5px 0; transition:color .18s; color:${C.textSm}; background:none; border:none; font-family:inherit; letter-spacing:.01em; }
   .nav-link:hover { color:${C.teal}; }
   .nav-link::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:2px; background:${C.teal}; transition:width .22s ease; border-radius:2px; }
@@ -37,6 +39,10 @@ const GLOBAL_CSS = `
   .card:hover { box-shadow:0 6px 24px rgba(11,191,191,.14) !important; transform:translateY(-2px); }
   .cal-cell { transition:background .12s; cursor:pointer; }
   .cal-cell:hover { background:${C.tealLt}; }
+  .bookmark-btn { transition:all .18s; }
+  .bookmark-btn:hover { transform:scale(1.15); }
+  .chat-history-item { transition:background .12s; }
+  .chat-history-item:hover { background:${C.tealLt} !important; }
   ::-webkit-scrollbar { width:4px; height:4px; }
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:${C.grayMd}; border-radius:99px; }
@@ -58,6 +64,7 @@ const GLOBAL_CSS = `
     .facil-analytics-row { grid-template-columns:1fr !important; }
     .home-search-box { padding:13px 50px 13px 18px !important; font-size:14px !important; }
     .home-chips span, .home-chips button { font-size:11px !important; padding:5px 12px !important; }
+    .chat-sidebar { width:280px !important; }
   }
   @media (min-width:701px) {
     .hamburger { display:none !important; }
@@ -166,6 +173,33 @@ function FooterLink({ onClick, children }) {
   );
 }
 
+// ─── BOOKMARK ICON ────────────────────────────────────────────────────────────
+function BookmarkIcon({ filled, size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? C.teal : "none"} stroke={filled ? C.teal : C.textSm} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+}
+
+function BookmarkButton({ providerId, bookmarks, toggleBookmark, isLoggedIn, setPage, size = 18 }) {
+  const isBookmarked = bookmarks.includes(providerId);
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (!isLoggedIn) {
+      setPage("signup");
+      return;
+    }
+    toggleBookmark(providerId);
+  };
+  return (
+    <button className="bookmark-btn" onClick={handleClick} title={isLoggedIn ? (isBookmarked ? "Remove bookmark" : "Bookmark this provider") : "Sign up to bookmark"}
+      style={{ background:"none", border:"none", cursor:"pointer", padding:4, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+      <BookmarkIcon filled={isBookmarked} size={size} />
+    </button>
+  );
+}
+
 // ─── NAV ─────────────────────────────────────────────────────────────────────
 function Nav({ setPage, isProviderView, setIsProviderView, isFacilitatorView, setIsFacilitatorView }) {
   const [open, setOpen] = useState(false);
@@ -176,15 +210,11 @@ function Nav({ setPage, isProviderView, setIsProviderView, isFacilitatorView, se
   ];
   return (
     <>
-      <nav style={{ height:58, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 20px", background:C.white, borderBottom:`1px solid ${C.border}`, position:"sticky", top:0, zIndex:200 }}>
-        <div onClick={() => { setPage("home"); setOpen(false); }} style={{ display:"flex", alignItems:"center", gap:6, cursor:"pointer", userSelect:"none" }}>
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <circle cx="9.5" cy="9.5" r="7" stroke="#047598" strokeWidth="2.8"/>
-            <line x1="14.5" y1="14.5" x2="20" y2="20" stroke="#047598" strokeWidth="2.8" strokeLinecap="round"/>
-          </svg>
+      <nav style={{ height:58, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px", background:C.white, borderBottom:`1px solid ${C.border}`, position:"sticky", top:0, zIndex:200 }}>
+        <div onClick={() => { setPage("home"); setOpen(false); }} style={{ display:"flex", alignItems:"center", gap:6, cursor:"pointer", userSelect:"none", minWidth:140 }}>
           <span style={{ fontSize:17, fontWeight:800, letterSpacing:"-.3px" }}><span style={{ color:C.teal }}>Hospital</span><span style={{ color:"#047598", fontWeight:800 }}>.com</span></span>
         </div>
-        <ul className="nav-desktop" style={{ display:"flex", gap:28, listStyle:"none" }}>
+        <ul className="nav-desktop" style={{ display:"flex", gap:28, listStyle:"none", position:"absolute", left:"50%", transform:"translateX(-50%)" }}>
           {links.map(l => <li key={l.label}><button className={`nav-link${l.accent?" accent":""}`} onClick={() => setPage(l.page)}>{l.label}</button></li>)}
         </ul>
         <div className="nav-desktop" style={{ display:"flex", gap:8, alignItems:"center" }}>
@@ -253,7 +283,7 @@ function FieldInput({ label, type, value, onChange, placeholder, hint, right }) 
   );
 }
 
-// Role Selector — card style with icons + descriptions
+// Role Selector
 function RoleSelector({ role, setRole }) {
   const roles = [
     {
@@ -295,7 +325,7 @@ function RoleSelector({ role, setRole }) {
   );
 }
 
-function LoginPage({ setPage }) {
+function LoginPage({ setPage, onLogin }) {
   const [role, setRole] = useState("patient");
   const [f, setF] = useState({ email:"", pw:"" });
   const [show, setShow] = useState(false);
@@ -303,11 +333,9 @@ function LoginPage({ setPage }) {
     <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
       <div className="fade-up" style={{ width:"100%", maxWidth:400, background:C.white, borderRadius:20, padding:"36px 30px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
         <div style={{ textAlign:"center", marginBottom:24 }}>
-         
           <h2 style={{ fontSize:22, fontWeight:800, color:C.text, marginBottom:4 }}>Sign In</h2>
           <p style={{ color:C.textSm, fontSize:13 }}>Sign in to your Hospital.com account</p>
         </div>
-        {/* Pill role toggle */}
         <div style={{ display:"flex", gap:10, marginBottom:24 }}>
           {[{val:"patient",label:"I'm a Patient"},{val:"provider",label:"I'm a Provider"}].map(r=>(
             <button key={r.val} onClick={()=>setRole(r.val)} style={{ flex:1, padding:"12px 10px", border:`2px solid ${role===r.val?C.teal:C.border}`, borderRadius:50, background:role===r.val?C.tealLt:C.white, cursor:"pointer", fontFamily:"inherit", transition:"all .18s", fontSize:13.5, fontWeight:700, color:role===r.val?C.teal:C.textMd }}>
@@ -324,22 +352,21 @@ function LoginPage({ setPage }) {
         <FieldInput label="Password" type={show?"text":"password"} value={f.pw} onChange={e=>setF(p=>({...p,pw:e.target.value}))} placeholder="••••••••"
           hint={<button onClick={()=>{}} style={{ background:"none", border:"none", fontSize:12, color:C.teal, cursor:"pointer", fontWeight:600, fontFamily:"inherit" }}>Forgot?</button>}
           right={<button onClick={()=>setShow(s=>!s)} style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", fontSize:11, color:C.textSm, fontWeight:700, fontFamily:"inherit" }}>{show?"Hide":"Show"}</button>} />
-        <button className="btn-primary" onClick={()=>setPage("home")} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"13px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Sign In as {role==="patient"?"Patient":"Provider"}</button>
+        <button className="btn-primary" onClick={()=>{onLogin();setPage("home");}} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"13px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Sign In as {role==="patient"?"Patient":"Provider"}</button>
         <p style={{ textAlign:"center", fontSize:13, color:C.textSm, marginTop:18 }}>No account?{" "}<button onClick={()=>setPage("signup")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>Sign Up</button></p>
       </div>
     </div>
   );
 }
 
-function SignupPage({ setPage }) {
-  const [step, setStep] = useState(0); // 0 = pick role, 1 = fill form
+function SignupPage({ setPage, onLogin }) {
+  const [step, setStep] = useState(0);
   const [role, setRole] = useState("patient");
   const [f, setF] = useState({ name:"", email:"", pw:"" });
   const [show, setShow] = useState(false);
   const [pf, setPf] = useState({ clinicName:"", specialty:"", location:"", email:"", phone:"" });
   const [providerDone, setProviderDone] = useState(false);
 
-  // Step 0 — Role picker card screen
   if (step === 0) {
     return (
       <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
@@ -358,7 +385,6 @@ function SignupPage({ setPage }) {
     );
   }
 
-  // Step 1 provider — done screen
   if (role === "provider" && providerDone) {
     return (
       <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
@@ -378,7 +404,6 @@ function SignupPage({ setPage }) {
     );
   }
 
-  // Step 1 provider — form
   if (role === "provider") {
     return (
       <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
@@ -405,7 +430,6 @@ function SignupPage({ setPage }) {
     );
   }
 
-  // Step 1 patient — form
   return (
     <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
       <div className="fade-up" style={{ width:"100%", maxWidth:400, background:C.white, borderRadius:20, padding:"36px 30px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
@@ -426,7 +450,7 @@ function SignupPage({ setPage }) {
         <FieldInput label="Email *" type="email" value={f.email} onChange={e=>setF(p=>({...p,email:e.target.value}))} placeholder="you@example.com" />
         <FieldInput label="Password *" type={show?"text":"password"} value={f.pw} onChange={e=>setF(p=>({...p,pw:e.target.value}))} placeholder="Create a password"
           right={<button onClick={()=>setShow(s=>!s)} style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", fontSize:11, color:C.textSm, fontWeight:700, fontFamily:"inherit" }}>{show?"Hide":"Show"}</button>} />
-        <button className="btn-primary" onClick={()=>setPage("home")} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"13px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Create Account</button>
+        <button className="btn-primary" onClick={()=>{onLogin();setPage("home");}} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"13px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Create Account</button>
         <p style={{ textAlign:"center", fontSize:13, color:C.textSm, marginTop:16 }}>Already have an account?{" "}<button onClick={()=>setPage("login")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>Sign In</button></p>
       </div>
     </div>
@@ -492,12 +516,7 @@ function BecomeProviderPage({ setPage }) {
 
 // ─── FACILITATOR CONTACT FORM MODAL ──────────────────────────────────────────
 function FacilitatorModal({ onClose, clinic }) {
-  const [f, setF] = useState({
-    name:"", email:"", phone:"",
-    procedure:"",
-    country:"",
-    message:""
-  });
+  const [f, setF] = useState({ name:"", email:"", phone:"", procedure:"", country:"", message:"" });
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -532,7 +551,6 @@ function FacilitatorModal({ onClose, clinic }) {
               <FieldInput label="Phone Number" type="tel" value={f.phone} onChange={e=>setF(p=>({...p,phone:e.target.value}))} placeholder="+1 416-555-0000" />
               <FieldInput label="Procedure *" type="text" value={f.procedure} onChange={e=>setF(p=>({...p,procedure:e.target.value}))} placeholder="e.g. Hair transplant, Dental implants, Knee replacement" />
               <FieldInput label="Preferred country or region (optional)" type="text" value={f.country} onChange={e=>setF(p=>({...p,country:e.target.value}))} placeholder="e.g. Turkey, Southeast Asia, Europe" />
-
               <div style={{ marginBottom:14 }}>
                 <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:5 }}>Short message (optional)</label>
                 <textarea value={f.message} onChange={e=>setF(p=>({...p,message:e.target.value}))} placeholder="Any additional details or questions…" rows={3}
@@ -549,7 +567,7 @@ function FacilitatorModal({ onClose, clinic }) {
 }
 
 // ─── PROVIDER CARD ────────────────────────────────────────────────────────────
-function ProviderCard({ provider, onClick, compact }) {
+function ProviderCard({ provider, onClick, compact, bookmarks, toggleBookmark, isLoggedIn, setPage }) {
   return (
     <div className="card" onClick={()=>onClick(provider)} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:compact?"12px 14px":"18px 20px", cursor:"pointer", display:"flex", gap:14, alignItems:"flex-start", boxShadow:"0 1px 4px rgba(0,0,0,.05)" }}>
       <div style={{ width:compact?42:52, height:compact?42:52, borderRadius:12, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:compact?13:17, color:C.teal, flexShrink:0, border:`1px solid ${C.tealLt}` }}>{provider.image}</div>
@@ -567,6 +585,9 @@ function ProviderCard({ provider, onClick, compact }) {
         </div>
         {!compact && <div style={{ display:"flex", gap:5, marginTop:10, flexWrap:"wrap" }}>{provider.tags.map(t=><span key={t} style={{ background:C.gray, color:C.textSm, fontSize:11, padding:"2px 8px", borderRadius:10 }}>{t}</span>)}</div>}
       </div>
+      {bookmarks && (
+        <BookmarkButton providerId={provider.id} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn} setPage={setPage} size={compact?16:18} />
+      )}
     </div>
   );
 }
@@ -658,12 +679,8 @@ function HomePage({ setPage, setInitialQuery }) {
     <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:isMobile?"28px 16px":"40px 16px", background:`linear-gradient(155deg, ${C.white} 50%, ${C.tealBg} 100%)` }}>
       <div className="fade-up" style={{ textAlign:"center", maxWidth:780, width:"100%", padding:"0 8px" }}>
 
-        {/* Logo */}
+        {/* Logo — no magnifying glass */}
         <div style={{ display:"inline-flex", alignItems:"center", gap:isMobile?7:10, marginBottom:isMobile?10:18 }}>
-          <svg width={isMobile?22:44} height={isMobile?22:44} viewBox="0 0 40 40" fill="none">
-            <circle cx="17" cy="17" r="12" stroke="#047598" strokeWidth="3.8"/>
-            <line x1="26" y1="26" x2="37" y2="37" stroke="#047598" strokeWidth="3.8" strokeLinecap="round"/>
-          </svg>
           <span style={{ fontSize:isMobile?28:40, fontWeight:800, letterSpacing:"-0.5px" }}><span style={{ color:C.teal }}>Hospital</span><span style={{ color:"#047598", fontWeight:800 }}>.com</span></span>
         </div>
 
@@ -688,7 +705,7 @@ function HomePage({ setPage, setInitialQuery }) {
           ))}
         </div>
 
-        {/* Feature cards — DESKTOP: 3-col grid / MOBILE: vertical list */}
+        {/* Feature cards */}
         {isMobile ? (
           <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
             {FEATURE_ITEMS.map(({alt,title,sub,icon})=>(
@@ -730,83 +747,302 @@ function HomePage({ setPage, setInitialQuery }) {
   );
 }
 
+// ─── CHAT SIDEBAR ─────────────────────────────────────────────────────────────
+function ChatSidebar({ chatHistory, activeChatId, onSelectChat, onNewChat, onDeleteChat, isOpen, onClose }) {
+  const isMobile = useIsMobile();
+
+  return (
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && isMobile && (
+        <div onClick={onClose} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.35)", zIndex:499 }}/>
+      )}
+      <div className={isOpen?"slide-in-left":""}
+        style={{
+          width: isMobile ? 300 : 300,
+          background: C.white,
+          borderRight: isMobile ? "none" : `1px solid ${C.border}`,
+          display: isOpen ? "flex" : "none",
+          flexDirection: "column",
+          flexShrink: 0,
+          height: isMobile ? "100vh" : "100%",
+          position: isMobile ? "fixed" : "relative",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          zIndex: isMobile ? 500 : 1,
+          boxShadow: isMobile ? "4px 0 24px rgba(0,0,0,.16)" : "none",
+          borderRadius: isMobile ? "0 20px 20px 0" : 0,
+        }}
+      >
+        {/* Header */}
+        <div style={{ padding: isMobile ? "16px 18px" : "16px 18px", borderBottom:`1px solid ${C.borderLt}`, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            {isMobile && <span style={{ fontSize:14, fontWeight:800, letterSpacing:"-.2px" }}><span style={{ color:C.teal }}>Hospital</span><span style={{ color:"#047598" }}>.com</span></span>}
+            {isMobile && <span style={{ width:1, height:16, background:C.border, display:"inline-block" }}/>}
+            <span style={{ fontWeight:700, fontSize:14.5, color:C.text }}>Chats</span>
+          </div>
+          <div style={{ display:"flex", gap:6 }}>
+            <button onClick={onNewChat} title="New chat" style={{ width:32, height:32, borderRadius:10, border:`1.5px solid ${C.border}`, background:C.offWhite, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition:"all .15s" }}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=C.teal;e.currentTarget.style.background=C.tealLt;}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.background=C.offWhite;}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            {isMobile && (
+              <button onClick={onClose} style={{ width:32, height:32, borderRadius:10, border:`1.5px solid ${C.border}`, background:C.offWhite, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.textSm} strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            )}
+          </div>
+        </div>
+        {/* Chat list */}
+        <div style={{ flex:1, overflowY:"auto", padding:"8px 10px" }}>
+          {chatHistory.length === 0 ? (
+            <div style={{ textAlign:"center", padding:"40px 16px", color:C.textSm }}>
+              <div style={{ width:44, height:44, borderRadius:14, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 12px" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <div style={{ fontSize:13, fontWeight:600, color:C.textMd, marginBottom:4 }}>No conversations yet</div>
+              <div style={{ fontSize:12 }}>Start a new chat to get started!</div>
+            </div>
+          ) : (
+            chatHistory.map(chat => (
+              <div key={chat.id} className="chat-history-item"
+                onClick={() => onSelectChat(chat.id)}
+                style={{
+                  padding:"11px 14px",
+                  borderRadius:12,
+                  cursor:"pointer",
+                  background: chat.id === activeChatId ? C.tealLt : "transparent",
+                  border: chat.id === activeChatId ? `1.5px solid ${C.teal}30` : "1.5px solid transparent",
+                  marginBottom:4,
+                  display:"flex",
+                  alignItems:"flex-start",
+                  gap:10,
+                }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={chat.id===activeChatId?C.teal:C.textSm} strokeWidth="2" style={{ flexShrink:0, marginTop:2 }}>
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:12.5, fontWeight:chat.id===activeChatId?700:500, color:chat.id===activeChatId?C.teal:C.text, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    {chat.title}
+                  </div>
+                  <div style={{ fontSize:10.5, color:C.textSm, marginTop:2 }}>
+                    {chat.messages.length - 1} message{chat.messages.length - 1 !== 1 ? "s" : ""} · {chat.timestamp}
+                  </div>
+                </div>
+                <button onClick={e=>{e.stopPropagation();onDeleteChat(chat.id);}} title="Delete chat"
+                  style={{ background:"none", border:"none", cursor:"pointer", padding:2, opacity:.4, transition:"opacity .15s", flexShrink:0 }}
+                  onMouseEnter={e=>e.currentTarget.style.opacity=1}
+                  onMouseLeave={e=>e.currentTarget.style.opacity=.4}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.red} strokeWidth="2"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/><path d="M9,6V4h6v2"/></svg>
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── CHAT ─────────────────────────────────────────────────────────────────────
-function ChatPage({ setPage, setSelectedProvider, initialQuery, setInitialQuery, openFacilitatorModal }) {
-  const [msgs, setMsgs] = useState([{ role:"assistant", text:"Hi! I'm your AI health assistant. Ask me about symptoms, health concerns, or finding a provider.\n\nThis is general health information only. Please consult a licensed healthcare professional for medical advice.", providers:[] }]);
+function ChatPage({ setPage, setSelectedProvider, initialQuery, setInitialQuery, openFacilitatorModal, bookmarks, toggleBookmark, isLoggedIn }) {
+  const WELCOME_MSG = { role:"assistant", text:"Hi! I'm your AI health assistant. Ask me about symptoms, health concerns, or finding a provider.\n\nThis is general health information only. Please consult a licensed healthcare professional for medical advice.", providers:[] };
+
+  const [chatHistory, setChatHistory] = useState([]);
+  const [activeChatId, setActiveChatId] = useState(null);
+  const [msgs, setMsgs] = useState([WELCOME_MSG]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const bottomRef = useRef(null);
+  const isMobile = useIsMobile();
 
   const AiAvatar = () => (
-    <div style={{ width:32, height:32, borderRadius:9, background:C.gray, flexShrink:0, overflow:"hidden" }}>
-      <img src={imgAiAvatar} alt="AI" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
+    <div style={{ width:38, height:38, borderRadius:14, background:`linear-gradient(135deg, ${C.tealLt}, ${C.tealBg})`, border:`1.5px solid ${C.teal}25`, flexShrink:0, overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <img src={imgAiAvatar} alt="AI" onError={e=>{e.currentTarget.style.display="none";}} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
     </div>
   );
 
+  // Save current chat to history
+  const saveCurrent = (currentMsgs, currentId) => {
+    if (!currentId || currentMsgs.length <= 1) return;
+    const firstUserMsg = currentMsgs.find(m => m.role === "user");
+    const title = firstUserMsg ? (firstUserMsg.text.length > 40 ? firstUserMsg.text.slice(0, 40) + "…" : firstUserMsg.text) : "New chat";
+    const now = new Date();
+    const timestamp = now.toLocaleDateString("en", { month:"short", day:"numeric" });
+    setChatHistory(prev => {
+      const existing = prev.findIndex(c => c.id === currentId);
+      const updated = { id: currentId, title, messages: currentMsgs, timestamp };
+      if (existing >= 0) {
+        const copy = [...prev];
+        copy[existing] = updated;
+        return copy;
+      }
+      return [updated, ...prev];
+    });
+  };
+
   const send = (text) => {
-    if(!text.trim()) return;
-    setMsgs(m=>[...m,{role:"user",text}]); setInput(""); setLoading(true);
+    if (!text.trim()) return;
+    // If no active chat, create one
+    let chatId = activeChatId;
+    if (!chatId) {
+      chatId = Date.now();
+      setActiveChatId(chatId);
+    }
+
+    const newMsgs = [...msgs, { role: "user", text }];
+    setMsgs(newMsgs);
+    setInput("");
+    setLoading(true);
+
     const resp = getResponse(text);
     const showIntlCTA = isInternationalQuery(text) || resp.showFacilitatorCTA;
-    setTimeout(()=>{
-      const providers = resp.providers ? (resp.facilitator ? FACILITATORS.slice(0,2).map(f=>({...f,specialty:"Medical Tourism",distance:99,contracted:f.contracted,hasCalendar:false})) : PROVIDERS.filter(p=>p.contracted).slice(0,3)) : [];
-      setMsgs(m=>[...m,{role:"assistant",text:resp.response,providers,emergency:resp.emergency,showIntlCTA}]);
+
+    setTimeout(() => {
+      const providers = resp.providers ? (resp.facilitator ? FACILITATORS.slice(0, 2).map(f => ({ ...f, specialty: "Medical Tourism", distance: 99, contracted: f.contracted, hasCalendar: false })) : PROVIDERS.filter(p => p.contracted).slice(0, 3)) : [];
+      const finalMsgs = [...newMsgs, { role: "assistant", text: resp.response, providers, emergency: resp.emergency, showIntlCTA }];
+      setMsgs(finalMsgs);
       setLoading(false);
+      saveCurrent(finalMsgs, chatId);
     }, 900);
+  };
+
+  const handleNewChat = () => {
+    saveCurrent(msgs, activeChatId);
+    setActiveChatId(null);
+    setMsgs([WELCOME_MSG]);
+    if (isMobile) setSidebarOpen(false);
+  };
+
+  const handleSelectChat = (id) => {
+    saveCurrent(msgs, activeChatId);
+    const chat = chatHistory.find(c => c.id === id);
+    if (chat) {
+      setActiveChatId(chat.id);
+      setMsgs(chat.messages);
+    }
+    if (isMobile) setSidebarOpen(false);
+  };
+
+  const handleDeleteChat = (id) => {
+    setChatHistory(prev => prev.filter(c => c.id !== id));
+    if (activeChatId === id) {
+      setActiveChatId(null);
+      setMsgs([WELCOME_MSG]);
+    }
   };
 
   useEffect(() => {
     if (initialQuery) { send(initialQuery); setInitialQuery(""); }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({behavior:"smooth"}); }, [msgs]);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
 
   return (
-    <div style={{ display:"flex", height:"calc(100vh - 58px)" }}>
-      <div style={{ flex:1, display:"flex", flexDirection:"column", maxWidth:780, margin:"0 auto", width:"100%" }}>
-        <div style={{ flex:1, overflowY:"auto", padding:"20px 14px" }}>
-          {msgs.map((msg,i)=>(
-            <div key={i} style={{ marginBottom:18 }}>
-              <div style={{ display:"flex", justifyContent:msg.role==="user"?"flex-end":"flex-start", gap:8 }}>
-                {msg.role==="assistant"&&<AiAvatar/>}
-                <div style={{ maxWidth:"78%", background:msg.role==="user"?C.teal:msg.emergency?C.redLt:C.gray, color:msg.role==="user"?"#fff":msg.emergency?C.red:C.text, borderRadius:msg.role==="user"?"18px 18px 4px 18px":"18px 18px 18px 4px", padding:"11px 15px", fontSize:13.5, lineHeight:1.7, border:msg.emergency?`1px solid ${C.redBd}`:"none", whiteSpace:"pre-wrap" }}>{msg.text}</div>
+    <div style={{ display: "flex", height: "calc(100vh - 58px)", background: C.white }}>
+      <ChatSidebar
+        chatHistory={chatHistory}
+        activeChatId={activeChatId}
+        onSelectChat={handleSelectChat}
+        onNewChat={handleNewChat}
+        onDeleteChat={handleDeleteChat}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", minWidth: 0 }}>
+        {/* Full-page chat */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", background: C.white, overflow: "hidden", minHeight: 0 }}>
+
+          {/* Chat header */}
+          <div style={{ padding: isMobile ? "10px 14px" : "14px 20px", background: C.white, display: "flex", alignItems: "center", gap: 10, borderBottom: `1px solid ${C.borderLt}` }}>
+            <button onClick={() => setSidebarOpen(o => !o)} title="Toggle chat history"
+              style={{ width: isMobile ? 34 : 38, height: isMobile ? 34 : 38, borderRadius: 10, border: `1.5px solid ${sidebarOpen ? C.teal : C.border}`, background: sidebarOpen ? C.tealLt : C.offWhite, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s", flexShrink: 0 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={sidebarOpen ? C.teal : C.textSm} strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+              </svg>
+            </button>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {activeChatId ? (chatHistory.find(c => c.id === activeChatId)?.title || "Chat") : "New Chat"}
               </div>
-              {msg.providers?.length>0&&(
-                <div style={{ marginTop:10, marginLeft:38 }}>
-                  <p style={{ fontSize:10, color:C.textSm, marginBottom:7, fontWeight:700, letterSpacing:.6 }}>SUGGESTED PROVIDERS</p>
-                  <div style={{ display:"flex",flexDirection:"column",gap:7 }}>
-                    {msg.providers.map(p=><ProviderCard key={p.id} provider={p} onClick={prov=>setSelectedProvider(prov)} compact />)}
-                  </div>
-                </div>
-              )}
-              {/* Facilitator CTA block for international queries */}
-              {msg.role==="assistant" && msg.showIntlCTA && (
-                <div className="fade-up" style={{ marginTop:10, marginLeft:38, background:`linear-gradient(120deg, ${C.purpleLt}, ${C.tealLt})`, border:`1px solid ${C.teal}30`, borderRadius:14, padding:"14px 16px", display:"flex", gap:12, alignItems:"center", flexWrap:"wrap" }}>
-                  <div style={{ flex:1, minWidth:180 }}>
-                    <div style={{ fontWeight:700, fontSize:13, marginBottom:3, color:C.text }}>Looking for care outside your country?</div>
-                    <div style={{ fontSize:12.5, color:C.textMd }}>We can connect you with a medical coordinator who specializes in international care.</div>
-                  </div>
-                  <button className="btn-primary" onClick={openFacilitatorModal} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:22, padding:"9px 18px", fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap" }}>Talk to a Facilitator</button>
-                </div>
-              )}
+              <div style={{ fontSize: 11.5, color: C.textSm, marginTop: 1, display: isMobile ? "none" : "block" }}>AI Health Assistant</div>
             </div>
-          ))}
-          {loading&&(
-            <div style={{ display:"flex",gap:8,alignItems:"center" }}>
-              <AiAvatar/>
-              <div style={{ background:C.gray,borderRadius:"18px 18px 18px 4px",padding:"13px 16px",display:"flex",gap:4 }}>
-                {[0,1,2].map(i=><div key={i} style={{ width:6,height:6,borderRadius:"50%",background:C.teal,animation:"bounce 1s infinite",animationDelay:`${i*.2}s` }}/>)}
-              </div>
-            </div>
-          )}
-          <div ref={bottomRef}/>
-        </div>
-        <div style={{ padding:"12px 14px", borderTop:`1px solid ${C.border}`, background:C.white }}>
-          <div style={{ display:"flex",gap:8,background:C.gray,borderRadius:28,padding:"6px 6px 6px 14px",alignItems:"center" }}>
-            <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send(input)} placeholder="Describe symptoms or ask a question…" style={{ flex:1,border:"none",background:"transparent",outline:"none",fontSize:13.5,fontFamily:"inherit",minWidth:0 }}/>
-            <button onClick={()=>send(input)} style={{ background:C.teal,border:"none",borderRadius:22,padding:"9px 18px",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap" }}>Send</button>
+            <button onClick={handleNewChat} title="New chat"
+              style={{ width: isMobile ? 34 : 38, height: isMobile ? 34 : 38, borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.offWhite, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = C.teal; e.currentTarget.style.background = C.tealLt; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.offWhite; }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+            </button>
           </div>
-          <p style={{ fontSize:10.5,color:C.textSm,textAlign:"center",marginTop:7 }}>For informational purposes only. Not a substitute for professional medical advice.</p>
+
+          {/* Messages area */}
+          <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? "16px 14px" : "28px 0", background: C.offWhite }}>
+           <div style={{ maxWidth: 820, margin: "0 auto", padding: isMobile ? 0 : "0 24px" }}>
+            {msgs.map((msg, i) => (
+              <div key={i} style={{ marginBottom: 20 }}>
+                <div style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", gap: 10, alignItems: "flex-end" }}>
+                  {msg.role === "assistant" && <AiAvatar />}
+                  <div style={{
+                    maxWidth: isMobile ? "85%" : "70%",
+                    background: msg.role === "user" ? `linear-gradient(135deg, ${C.teal}, ${C.tealDk})` : msg.emergency ? C.redLt : C.white,
+                    color: msg.role === "user" ? "#fff" : msg.emergency ? C.red : C.text,
+                    borderRadius: msg.role === "user" ? "20px 20px 4px 20px" : "20px 20px 20px 4px",
+                    padding: isMobile ? "13px 16px" : "15px 22px",
+                    fontSize: isMobile ? 13.5 : 14, lineHeight: 1.75,
+                    border: msg.emergency ? `1px solid ${C.redBd}` : msg.role === "assistant" ? `1px solid ${C.border}` : "none",
+                    whiteSpace: "pre-wrap",
+                    boxShadow: msg.role === "user" ? "0 3px 14px rgba(90,202,214,.22)" : "0 1px 6px rgba(0,0,0,.04)",
+                  }}>{msg.text}</div>
+                </div>
+                {msg.providers?.length > 0 && (
+                  <div style={{ marginTop: 12, marginLeft: 48 }}>
+                    <p style={{ fontSize: 10, color: C.textSm, marginBottom: 8, fontWeight: 700, letterSpacing: .6 }}>SUGGESTED PROVIDERS</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {msg.providers.map(p => <ProviderCard key={p.id} provider={p} onClick={prov => setSelectedProvider(prov)} compact bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn} setPage={setPage} />)}
+                    </div>
+                  </div>
+                )}
+                {msg.role === "assistant" && msg.showIntlCTA && (
+                  <div className="fade-up" style={{ marginTop: 12, marginLeft: 48, background: `linear-gradient(120deg, ${C.purpleLt}, ${C.tealLt})`, border: `1px solid ${C.teal}30`, borderRadius: 16, padding: "16px 18px", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                    <div style={{ flex: 1, minWidth: 180 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 3, color: C.text }}>Looking for care outside your country?</div>
+                      <div style={{ fontSize: 12.5, color: C.textMd }}>We can connect you with a medical coordinator who specializes in international care.</div>
+                    </div>
+                    <button className="btn-primary" onClick={openFacilitatorModal} style={{ background: C.teal, color: "#fff", border: "none", borderRadius: 22, padding: "9px 18px", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>Talk to a Facilitator</button>
+                  </div>
+                )}
+              </div>
+            ))}
+            {loading && (
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+                <AiAvatar />
+                <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "20px 20px 20px 4px", padding: "15px 22px", display: "flex", gap: 6, boxShadow: "0 1px 6px rgba(0,0,0,.04)" }}>
+                  {[0, 1, 2].map(i => <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: C.teal, animation: "bounce 1s infinite", animationDelay: `${i * .18}s` }} />)}
+                </div>
+              </div>
+            )}
+            <div ref={bottomRef} />
+           </div>
+          </div>
+
+          {/* Input area */}
+          <div style={{ padding: isMobile ? "12px 14px" : "18px 24px", background: C.white, borderTop: `1px solid ${C.borderLt}` }}>
+           <div style={{ maxWidth: 820, margin: "0 auto" }}>
+            <div style={{ display: "flex", gap: 10, background: C.offWhite, borderRadius: 22, padding: "6px 6px 6px 20px", alignItems: "center", border: `1.5px solid ${C.border}`, transition: "border-color .2s, box-shadow .2s" }}
+              onFocus={e => { e.currentTarget.style.borderColor = C.teal; e.currentTarget.style.boxShadow = `0 0 0 3px ${C.teal}15`; }}
+              onBlur={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.boxShadow = "none"; }}>
+              <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && send(input)} placeholder="Describe symptoms or ask a question…" style={{ flex: 1, border: "none", background: "transparent", outline: "none", fontSize: 14.5, fontFamily: "inherit", minWidth: 0, color: C.text, padding: "6px 0" }} />
+              <button onClick={() => send(input)} style={{ background: C.teal, border: "none", borderRadius: 18, padding: "11px 24px", color: "#fff", fontWeight: 700, fontSize: 13.5, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", transition: "background .15s, transform .1s" }}
+                onMouseEnter={e => { e.currentTarget.style.background = C.tealDk; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = C.teal; e.currentTarget.style.transform = "none"; }}>Send</button>
+            </div>
+            <p style={{ fontSize: 10.5, color: C.textSm, textAlign: "center", marginTop: 10 }}>For informational purposes only. Not a substitute for professional medical advice.</p>
+           </div>
+          </div>
         </div>
       </div>
     </div>
@@ -814,80 +1050,110 @@ function ChatPage({ setPage, setSelectedProvider, initialQuery, setInitialQuery,
 }
 
 // ─── DIRECTORY ────────────────────────────────────────────────────────────────
-function DirectoryPage({ setPage, setSelectedProvider }) {
+function DirectoryPage({ setPage, setSelectedProvider, bookmarks, toggleBookmark, isLoggedIn }) {
   const [specialty, setSpecialty] = useState("All");
   const [city, setCity] = useState("All");
   const [minRating, setMinRating] = useState(0);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("rating");
+  const [viewTab, setViewTab] = useState("all"); // "all" | "bookmarked"
 
-  let filtered = PROVIDERS.filter(p=>
-    (specialty==="All"||p.specialty===specialty||p.tags.includes(specialty)) &&
-    (city==="All"||p.city===city) &&
-    p.rating>=minRating &&
-    (!search||p.name.toLowerCase().includes(search.toLowerCase())||p.specialty.toLowerCase().includes(search.toLowerCase()))
+  let filtered = PROVIDERS.filter(p =>
+    (specialty === "All" || p.specialty === specialty || p.tags.includes(specialty)) &&
+    (city === "All" || p.city === city) &&
+    p.rating >= minRating &&
+    (!search || p.name.toLowerCase().includes(search.toLowerCase()) || p.specialty.toLowerCase().includes(search.toLowerCase()))
   );
-  if(sortBy==="rating") filtered=[...filtered].sort((a,b)=>b.rating-a.rating);
-  if(sortBy==="distance") filtered=[...filtered].sort((a,b)=>a.distance-b.distance);
-  if(sortBy==="reviews") filtered=[...filtered].sort((a,b)=>b.reviews-a.reviews);
-  filtered=[...filtered.filter(p=>p.contracted), ...filtered.filter(p=>!p.contracted)];
+
+  // Apply bookmark filter
+  if (viewTab === "bookmarked") {
+    filtered = filtered.filter(p => bookmarks.includes(p.id));
+  }
+
+  if (sortBy === "rating") filtered = [...filtered].sort((a, b) => b.rating - a.rating);
+  if (sortBy === "distance") filtered = [...filtered].sort((a, b) => a.distance - b.distance);
+  if (sortBy === "reviews") filtered = [...filtered].sort((a, b) => b.reviews - a.reviews);
+  filtered = [...filtered.filter(p => p.contracted), ...filtered.filter(p => !p.contracted)];
 
   return (
-    <div style={{ maxWidth:1100, margin:"0 auto", padding:"28px 16px" }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20, flexWrap:"wrap", gap:10 }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 16px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
-          <h1 style={{ fontSize:22, fontWeight:800, marginBottom:2 }}>Provider Directory</h1>
-          <p style={{ color:C.textSm, fontSize:13 }}>Verified healthcare providers across Canada</p>
+          <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 2 }}>Provider Directory</h1>
+          <p style={{ color: C.textSm, fontSize: 13 }}>Verified healthcare providers across Canada</p>
         </div>
       </div>
-      <div style={{ display:"flex", gap:8, marginBottom:12, flexWrap:"wrap" }}>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or specialty…" style={{ flex:1, minWidth:180, padding:"9px 15px", border:`1.5px solid ${C.border}`, borderRadius:22, fontSize:13.5, outline:"none", fontFamily:"inherit" }} onFocus={e=>e.target.style.borderColor=C.teal} onBlur={e=>e.target.style.borderColor=C.border}/>
+
+      {/* Tab: All / Bookmarked */}
+      <div style={{ display: "flex", gap: 3, background: C.gray, borderRadius: 11, padding: 3, marginBottom: 16, width: "fit-content" }}>
+        {[{ key: "all", label: "All Providers" }, { key: "bookmarked", label: `Bookmarked (${bookmarks.length})` }].map(t => (
+          <button key={t.key} onClick={() => {
+            if (t.key === "bookmarked" && !isLoggedIn) { setPage("signup"); return; }
+            setViewTab(t.key);
+          }} style={{ padding: "7px 18px", border: "none", borderRadius: 9, background: viewTab === t.key ? C.white : "transparent", fontWeight: viewTab === t.key ? 700 : 400, fontSize: 13, cursor: "pointer", color: viewTab === t.key ? C.text : C.textSm, boxShadow: viewTab === t.key ? "0 1px 4px rgba(0,0,0,.08)" : "none", whiteSpace: "nowrap", fontFamily: "inherit", transition: "all .15s", display: "flex", alignItems: "center", gap: 6 }}>
+            {t.key === "bookmarked" && <BookmarkIcon filled={viewTab === "bookmarked"} size={13} />}
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name or specialty…" style={{ flex: 1, minWidth: 180, padding: "9px 15px", border: `1.5px solid ${C.border}`, borderRadius: 22, fontSize: 13.5, outline: "none", fontFamily: "inherit" }} onFocus={e => e.target.style.borderColor = C.teal} onBlur={e => e.target.style.borderColor = C.border} />
         <Select value={specialty} onChange={setSpecialty} minWidth={160}
-          options={["All","Family Medicine","Cardiology","Dermatology","Medical Aesthetics","Orthopedics"]}/>
+          options={[{value:"All",label:"All Specialties"}, "Family Medicine", "Cardiology", "Dermatology", "Medical Aesthetics", "Orthopedics"]} />
         <Select value={city} onChange={setCity} minWidth={120}
-          options={["All","Toronto","Vancouver"]}/>
+          options={[{value:"All",label:"All Cities"}, "Toronto", "Vancouver"]} />
         <Select value={sortBy} onChange={setSortBy} minWidth={140}
-          options={[{value:"rating",label:"Sort: Rating"},{value:"distance",label:"Sort: Distance"},{value:"reviews",label:"Sort: Reviews"}]}/>
+          options={[{ value: "rating", label: "Sort: Rating" }, { value: "distance", label: "Sort: Distance" }, { value: "reviews", label: "Sort: Reviews" }]} />
       </div>
-      <div style={{ display:"flex", gap:7, marginBottom:18, flexWrap:"wrap", alignItems:"center" }}>
-        <span style={{ fontSize:11, fontWeight:700, color:C.textSm }}>MIN RATING</span>
-        {[{l:"Any",v:0},{l:"4+",v:4},{l:"4.5+",v:4.5},{l:"4.8+",v:4.8}].map(r=><Chip key={r.l} label={r.l} active={minRating===r.v} onClick={()=>setMinRating(r.v)}/>)}
+      <div style={{ display: "flex", gap: 7, marginBottom: 18, flexWrap: "wrap", alignItems: "center" }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: C.textSm }}>MIN RATING</span>
+        {[{ l: "Any", v: 0 }, { l: "4+", v: 4 }, { l: "4.5+", v: 4.5 }, { l: "4.8+", v: 4.8 }].map(r => <Chip key={r.l} label={r.l} active={minRating === r.v} onClick={() => setMinRating(r.v)} />)}
       </div>
-      <p style={{ fontSize:12.5, color:C.textSm, marginBottom:14 }}>{filtered.length} provider{filtered.length!==1?"s":""} found</p>
-      <div className="prov-grid-3col" style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:14 }}>
-        {filtered.map(p=>(
-          <div key={p.id} className="card" onClick={()=>setSelectedProvider(p)} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"20px", cursor:"pointer", boxShadow:"0 1px 4px rgba(0,0,0,.05)", display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
+      <p style={{ fontSize: 12.5, color: C.textSm, marginBottom: 14 }}>
+        {filtered.length} provider{filtered.length !== 1 ? "s" : ""} found
+        {viewTab === "bookmarked" && filtered.length === 0 && " — bookmark providers to see them here"}
+      </p>
+      <div className="prov-grid-3col" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+        {filtered.map(p => (
+          <div key={p.id} className="card" onClick={() => setSelectedProvider(p)} style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 14, padding: "20px", cursor: "pointer", boxShadow: "0 1px 4px rgba(0,0,0,.05)", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative" }}>
+            {/* Bookmark icon — top right */}
+            <div style={{ position: "absolute", top: 14, right: 14 }}>
+              <BookmarkButton providerId={p.id} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn} setPage={setPage} size={20} />
+            </div>
             <div>
-              <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:10 }}>
-                <div style={{ width:48, height:48, borderRadius:12, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:15, color:C.teal, flexShrink:0, border:`1px solid ${C.tealLt}` }}>{p.image}</div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
-                    <span style={{ fontWeight:700, fontSize:14.5 }}>{p.name}</span>
-                    {p.contracted && <span style={{ display:"inline-flex", alignItems:"center", gap:3, background:C.amberLt, color:"#B45309", fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:20, letterSpacing:.3 }}>Featured</span>}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10, paddingRight: 30 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: C.tealLt, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 15, color: C.teal, flexShrink: 0, border: `1px solid ${C.tealLt}` }}>{p.image}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <span style={{ fontWeight: 700, fontSize: 14.5 }}>{p.name}</span>
+                    {p.contracted && <span style={{ display: "inline-flex", alignItems: "center", gap: 3, background: C.amberLt, color: "#B45309", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 20, letterSpacing: .3 }}>Featured</span>}
                   </div>
-                  <div style={{ color:C.textSm, fontSize:12.5 }}>{p.specialty}</div>
+                  <div style={{ color: C.textSm, fontSize: 12.5 }}>{p.specialty}</div>
                 </div>
               </div>
-              <div style={{ display:"flex", gap:6, alignItems:"center", fontSize:12, color:C.textSm, marginBottom:10 }}>
-                <span style={{ color:C.amber }}>★ {p.rating}</span>
+              <div style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 12, color: C.textSm, marginBottom: 10 }}>
+                <span style={{ color: C.amber }}>★ {p.rating}</span>
                 <span>· {p.reviews} reviews</span>
                 <span>· {p.distance}km</span>
               </div>
-              <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:14 }}>
-                {p.tags.map(t=><span key={t} style={{ background:C.tealLt, color:C.teal, fontSize:11, fontWeight:600, padding:"3px 10px", borderRadius:10 }}>{t}</span>)}
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 14 }}>
+                {p.tags.map(t => <span key={t} style={{ background: C.tealLt, color: C.teal, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 10 }}>{t}</span>)}
               </div>
-              <div style={{ fontSize:12, color:C.textSm, marginBottom:14 }}>
+              <div style={{ fontSize: 12, color: C.textSm, marginBottom: 14 }}>
                 {p.address} · {p.hours}
               </div>
             </div>
             {p.contracted ? (
-              <button className="btn-primary" style={{ width:"100%", padding:"10px", border:"none", borderRadius:22, background:C.teal, color:"#fff", fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Book Appointment</button>
+              <button className="btn-primary" style={{ width: "100%", padding: "10px", border: "none", borderRadius: 22, background: C.teal, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>Book Appointment</button>
             ) : (
-              <button className="btn-ghost" style={{ width:"100%", padding:"10px", border:`1.5px solid ${C.border}`, borderRadius:22, background:C.white, color:C.textMd, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Request Info</button>
+              <button className="btn-ghost" style={{ width: "100%", padding: "10px", border: `1.5px solid ${C.border}`, borderRadius: 22, background: C.white, color: C.textMd, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>Request Info</button>
             )}
           </div>
         ))}
-        {filtered.length===0&&<div style={{ gridColumn:"1 / -1", textAlign:"center", padding:48, color:C.textSm, background:C.gray, borderRadius:14 }}>No providers found. Adjust your filters.</div>}
+        {filtered.length === 0 && <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: 48, color: C.textSm, background: C.gray, borderRadius: 14 }}>
+          {viewTab === "bookmarked" ? "No bookmarked providers yet. Browse the directory and bookmark providers you're interested in." : "No providers found. Adjust your filters."}
+        </div>}
       </div>
     </div>
   );
@@ -935,8 +1201,8 @@ function FacilitatorsPage({ setPage, setSelectedProvider }) {
       <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"14px 16px", marginBottom:18 }}>
         <div style={{ display:"flex", gap:8, marginBottom:12, flexWrap:"wrap" }}>
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search facilitators…" style={{ flex:1, minWidth:160, padding:"8px 13px", border:`1.5px solid ${C.border}`, borderRadius:20, fontSize:13, outline:"none", fontFamily:"inherit" }} onFocus={e=>e.target.style.borderColor=C.teal} onBlur={e=>e.target.style.borderColor=C.border}/>
-          <Select value={procedure} onChange={setProcedure} minWidth={160} options={allProcedures}/>
-          <Select value={city} onChange={setCity} minWidth={130} options={allCities}/>
+          <Select value={procedure} onChange={setProcedure} minWidth={160} options={allProcedures.map(p=>({value:p, label:p==="All"?"All Procedures":p}))}/>
+          <Select value={city} onChange={setCity} minWidth={130} options={allCities.map(c=>({value:c, label:c==="All"?"All Cities":c}))}/>
           <Select value={sortBy} onChange={setSortBy} minWidth={130}
             options={[{value:"rating",label:"Rating ↓"},{value:"reviews",label:"Reviews ↓"}]}/>
         </div>
@@ -1016,35 +1282,29 @@ function InternationalPage({ setSelectedClinic, openFacilitatorModal }) {
 
   return (
     <div style={{ minHeight:"calc(100vh - 58px)", background:C.offWhite }}>
-      {/* Dark hero */}
       <div style={{ background:"linear-gradient(135deg,#0E1C26 0%,#1a3a4a 100%)", padding:isMobile?"32px 20px":"56px 40px", textAlign:"center", color:"#fff" }}>
         <h1 style={{ fontSize:isMobile?22:34, fontWeight:800, marginBottom:10, letterSpacing:"-.3px" }}>World-Class Care Abroad</h1>
         <p style={{ color:"#7A8FA0", fontSize:isMobile?13:15, marginBottom:24, maxWidth:560, margin:"0 auto 24px" }}>Connect with accredited clinics in 20+ countries. Save 40–80% vs. home country costs.</p>
-        {/* Search in hero */}
         <div style={{ position:"relative", maxWidth:560, margin:"0 auto 20px" }}>
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search clinics, countries, procedures…"
-            style={{ width:"100%", padding:"13px 50px 13px 20px", border:"1.5px solid rgba(255,255,255,.15)", borderRadius:28, fontSize:14, outline:"none", fontFamily:"inherit", background:"rgba(255,255,255,.08)", color:"#fff", boxSizing:"border-box" }}
+            style={{ width:"100%", padding:"13px 20px", border:"1.5px solid rgba(255,255,255,.15)", borderRadius:28, fontSize:14, outline:"none", fontFamily:"inherit", background:"rgba(255,255,255,.08)", color:"#fff", boxSizing:"border-box" }}
             onFocus={e=>{e.target.style.borderColor=C.teal;e.target.style.background="rgba(255,255,255,.12)";}}
             onBlur={e=>{e.target.style.borderColor="rgba(255,255,255,.15)";e.target.style.background="rgba(255,255,255,.08)";}}/>
-          <svg style={{ position:"absolute", right:16, top:"50%", transform:"translateY(-50%)", opacity:.5 }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </div>
         <button className="btn-primary" onClick={openFacilitatorModal} style={{ padding:isMobile?"11px 22px":"13px 28px", background:C.teal, color:"#fff", border:"none", borderRadius:28, fontSize:isMobile?13:14, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>Talk to a Facilitator</button>
       </div>
 
-      {/* Filter dropdowns */}
-      <div style={{ padding:isMobile?"14px 16px 0":"20px 40px 0", display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-        <Select value={country} onChange={setCountry} minWidth={0} options={allCountries.map(c=>({value:c, label:c==="All"?"All Countries":c}))}/>
-        <Select value={procedure} onChange={setProcedure} minWidth={0} options={allProcedures.map(p=>({value:p, label:p==="All"?"All Procedures":p}))}/>
+      <div style={{ padding:isMobile?"14px 16px 0":"20px 40px 0", display:"flex", justifyContent:"center", gap:12 }}>
+        <div style={{ width:isMobile?"50%":"220px" }}><Select value={country} onChange={setCountry} minWidth={0} options={allCountries.map(c=>({value:c, label:c==="All"?"All Countries":c}))}/></div>
+        <div style={{ width:isMobile?"50%":"220px" }}><Select value={procedure} onChange={setProcedure} minWidth={0} options={allProcedures.map(p=>({value:p, label:p==="All"?"All Procedures":p}))}/></div>
       </div>
 
-      {/* Clinic grid */}
       <div style={{ padding:isMobile?"16px":"20px 40px 48px" }}>
         <p style={{ fontSize:12.5, color:C.textSm, marginBottom:14 }}>{filtered.length} clinic{filtered.length!==1?"s":""} found</p>
         <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(4, 1fr)", gap:isMobile?10:16 }}>
           {filtered.map((clinic,idx)=>(
             <div key={clinic.id} className="card" onClick={()=>setSelectedClinic(clinic)}
               style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, overflow:"hidden", cursor:"pointer", boxShadow:"0 1px 4px rgba(0,0,0,.05)" }}>
-              {/* Card image header */}
               {isMobile ? (
                 <div style={{ display:"flex", alignItems:"center", gap:12, padding:"14px 14px 0" }}>
                   <div style={{ width:48, height:48, borderRadius:12, background:CLINIC_GRADIENTS[idx%CLINIC_GRADIENTS.length], display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, fontWeight:800, color:"rgba(255,255,255,.4)", flexShrink:0 }}>{clinic.image}</div>
@@ -1100,7 +1360,6 @@ function InternationalClinicProfile({ clinic, onBack, openFacilitatorModal }) {
 
   return (
     <div ref={scrollRef} style={{ maxHeight:"calc(100vh - 58px)", overflowY:"auto", position:"relative" }}>
-      {/* Sticky banner */}
       {scrolled && (
         <div className="fade-up" style={{ position:"sticky", top:0, zIndex:100, background:`linear-gradient(120deg, ${C.purple}EE, ${C.teal}EE)`, backdropFilter:"blur(8px)", padding:"12px 20px", display:"flex", gap:14, alignItems:"center", justifyContent:"space-between", flexWrap:"wrap" }}>
           <div style={{ color:"#fff", fontSize:13.5, fontWeight:600 }}>Not sure where to start? Our medical coordinators can help you navigate your options.</div>
@@ -1108,12 +1367,10 @@ function InternationalClinicProfile({ clinic, onBack, openFacilitatorModal }) {
         </div>
       )}
       <div style={{ maxWidth:860, margin:"0 auto", padding:"32px 20px 60px" }}>
-        {/* Back button */}
         <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", color:C.textSm, fontSize:13.5, fontWeight:600, fontFamily:"inherit", display:"flex", alignItems:"center", gap:6, marginBottom:22, padding:0 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15,18 9,12 15,6"/></svg>
           Back to International
         </button>
-        {/* Header */}
         <div className="fade-up" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:20, padding:"28px 26px", marginBottom:18, boxShadow:"0 2px 12px rgba(0,0,0,.06)" }}>
           <div style={{ display:"flex", gap:18, alignItems:"flex-start", flexWrap:"wrap" }}>
             <div style={{ width:72, height:72, borderRadius:18, background:C.purpleLt, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:22, color:C.purple, flexShrink:0 }}>{clinic.image}</div>
@@ -1133,12 +1390,10 @@ function InternationalClinicProfile({ clinic, onBack, openFacilitatorModal }) {
             </div>
           </div>
         </div>
-        {/* Description */}
         <div className="fade-up" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:16, padding:"22px 24px", marginBottom:18, boxShadow:"0 1px 6px rgba(0,0,0,.04)" }}>
           <h2 style={{ fontWeight:800, fontSize:16, marginBottom:12 }}>About this Clinic</h2>
           <p style={{ color:C.textMd, fontSize:14.5, lineHeight:1.75 }}>{clinic.description}</p>
         </div>
-        {/* Procedures detail */}
         <div className="fade-up" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:16, padding:"22px 24px", marginBottom:28, boxShadow:"0 1px 6px rgba(0,0,0,.04)" }}>
           <h2 style={{ fontWeight:800, fontSize:16, marginBottom:14 }}>Available Procedures</h2>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(180px, 1fr))", gap:10 }}>
@@ -1152,9 +1407,7 @@ function InternationalClinicProfile({ clinic, onBack, openFacilitatorModal }) {
             ))}
           </div>
         </div>
-        {/* CTA Section */}
         <div className="fade-up" style={{ background:`linear-gradient(135deg, ${C.purpleLt}, ${C.tealLt})`, border:`1px solid ${C.teal}30`, borderRadius:20, padding:"30px 28px", textAlign:"center", boxShadow:"0 4px 16px rgba(11,191,191,.10)" }}>
-          
           <h2 style={{ fontWeight:800, fontSize:20, marginBottom:10 }}>Not sure where to start?</h2>
           <p style={{ color:C.textMd, fontSize:14.5, lineHeight:1.65, maxWidth:480, margin:"0 auto 22px" }}>Our medical coordinators can help you navigate your options, compare clinics, arrange travel, and coordinate your full care journey.</p>
           <button className="btn-primary" onClick={()=>openFacilitatorModal(clinic)} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:22, padding:"14px 32px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit" }}>Talk to a Facilitator</button>
@@ -1167,13 +1420,12 @@ function InternationalClinicProfile({ clinic, onBack, openFacilitatorModal }) {
 // ─── PROVIDER MODAL ───────────────────────────────────────────────────────────
 const BOOKED = ["9:00","10:30","14:00"];
 
-function ProviderModal({ provider, onClose, setBookings }) {
+function ProviderModal({ provider, onClose, setBookings, bookmarks, toggleBookmark, isLoggedIn, setPage }) {
   const [showBooking, setShowBooking] = useState(false);
   const [tab, setTab] = useState("calendar");
   const [form, setForm] = useState({ name:"",email:"",phone:"",reason:"",time:"" });
   const [selectedDate, setSelectedDate] = useState(null);
   const [done, setDone] = useState(false);
-  const scrollRef = useRef(null);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -1192,7 +1444,7 @@ function ProviderModal({ provider, onClose, setBookings }) {
 
   return (
     <div onClick={e=>{ if(e.target===e.currentTarget) onClose(); }} style={{ position:"fixed",inset:0,background:"rgba(10,20,30,.55)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:500,padding:"16px",backdropFilter:"blur(3px)" }}>
-      <div ref={scrollRef} className="fade-up" style={{ background:C.white,borderRadius:20,width:"100%",maxWidth:780,maxHeight:"90vh",overflowY:"auto",boxShadow:"0 24px 60px rgba(0,0,0,.22)" }}>
+      <div className="fade-up" style={{ background:C.white,borderRadius:20,width:"100%",maxWidth:780,maxHeight:"90vh",overflowY:"auto",boxShadow:"0 24px 60px rgba(0,0,0,.22)" }}>
         <div style={{ background:`linear-gradient(110deg, ${C.tealLt}, ${C.tealBg})`, padding:"22px 22px 18px", borderBottom:`1px solid ${C.border}`, position:"sticky", top:0, zIndex:10 }}>
           <div style={{ display:"flex", gap:16, alignItems:"flex-start" }}>
             <div style={{ width:60, height:60, borderRadius:14, background:C.white, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:19, color:C.teal, boxShadow:"0 2px 8px rgba(0,0,0,.08)", flexShrink:0 }}>{provider.image}</div>
@@ -1208,7 +1460,10 @@ function ProviderModal({ provider, onClose, setBookings }) {
                 <span style={{ color:C.textSm }}>{provider.hours}</span>
               </div>
             </div>
-            <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:C.textSm, fontSize:22, lineHeight:1, padding:4, flexShrink:0 }}>×</button>
+            <div style={{ display:"flex", gap:6, alignItems:"center", flexShrink:0 }}>
+              <BookmarkButton providerId={provider.id} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn} setPage={setPage} size={22} />
+              <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:C.textSm, fontSize:22, lineHeight:1, padding:4 }}>×</button>
+            </div>
           </div>
         </div>
         <div style={{ padding:"20px 22px" }}>
@@ -1550,13 +1805,9 @@ function ProviderDashboard() {
           </div>
         </>
       )}
-      {tab==="leads"&&(
-        <LeadsTab/>
-      )}
+      {tab==="leads"&&<LeadsTab/>}
       {tab==="calendar"&&<DemoCalendar events={events} setEvents={setEvents}/>}
-      {tab==="profile"&&(
-        <ProfileTab/>
-      )}
+      {tab==="profile"&&<ProfileTab/>}
     </div>
   );
 }
@@ -1618,7 +1869,6 @@ function FacilitatorDashboard() {
 
   const allProcs = ["All", ...Array.from(new Set(FACIL_LEADS.map(l=>l.procedure)))];
 
-  // ── Sort + filter ──
   let visible = leads.filter(l =>
     (filterStatus === "All" || l.status === filterStatus) &&
     (filterProc === "All" || l.procedure === filterProc) &&
@@ -1636,7 +1886,6 @@ function FacilitatorDashboard() {
     return 0;
   });
 
-  // ── Analytics helpers ──
   const all = leads;
   const genderCount = { Male: all.filter(l=>l.gender==="Male").length, Female: all.filter(l=>l.gender==="Female").length };
   const ageGroups = [
@@ -1663,7 +1912,6 @@ function FacilitatorDashboard() {
 
   return (
     <div style={{ maxWidth:1040, margin:"0 auto", padding:"24px 16px" }}>
-      {/* Header */}
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:22, flexWrap:"wrap", gap:12 }}>
         <div>
           <h1 style={{ fontSize:20, fontWeight:800 }}>Facilitator Dashboard</h1>
@@ -1676,14 +1924,12 @@ function FacilitatorDashboard() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div style={{ display:"flex", gap:3, background:C.gray, borderRadius:11, padding:3, marginBottom:22, width:"fit-content", overflowX:"auto" }}>
         {["overview","leads","analytics"].map(t=>(
           <button key={t} onClick={()=>setTab(t)} style={{ padding:"7px 20px", border:"none", borderRadius:9, background:tab===t?C.white:"transparent", fontWeight:tab===t?700:400, fontSize:13, cursor:"pointer", color:tab===t?C.text:C.textSm, boxShadow:tab===t?"0 1px 4px rgba(0,0,0,.08)":"none", textTransform:"capitalize", whiteSpace:"nowrap", fontFamily:"inherit", transition:"all .15s" }}>{t}</button>
         ))}
       </div>
 
-      {/* ── OVERVIEW ── */}
       {tab==="overview"&&(
         <>
           <div className="dash-stats" style={{ display:"grid", gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(auto-fit, minmax(150px,1fr))", gap:10, marginBottom:18 }}>
@@ -1701,7 +1947,6 @@ function FacilitatorDashboard() {
             ))}
           </div>
 
-          {/* Status breakdown */}
           <div className="facil-charts" style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(auto-fit,minmax(260px,1fr))", gap:14, marginBottom:14 }}>
             <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"18px 20px" }}>
               <h3 style={{ fontWeight:700, fontSize:14, marginBottom:16 }}>Lead Status</h3>
@@ -1745,7 +1990,6 @@ function FacilitatorDashboard() {
             </div>
           </div>
 
-          {/* Recent leads mini-table */}
           <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, overflow:"hidden" }}>
             <div style={{ padding:"14px 18px", borderBottom:`1px solid ${C.border}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
               <h3 style={{ fontWeight:700, fontSize:14 }}>Recent Requests</h3>
@@ -1770,13 +2014,12 @@ function FacilitatorDashboard() {
         </>
       )}
 
-      {/* ── LEADS ── */}
       {tab==="leads"&&(
         <>
           <div style={{ display:"flex", gap:8, marginBottom:14, flexWrap:"wrap" }}>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name, procedure, city…" style={{ flex:1, minWidth:180, padding:"9px 15px", border:`1.5px solid ${C.border}`, borderRadius:22, fontSize:13.5, outline:"none", fontFamily:"inherit" }} onFocus={e=>e.target.style.borderColor=C.teal} onBlur={e=>e.target.style.borderColor=C.border}/>
-            <Select value={filterStatus} onChange={setFilterStatus} minWidth={130} options={["All","New","Contacted","Converted","Closed"]}/>
-            <Select value={filterProc} onChange={setFilterProc} minWidth={180} options={allProcs}/>
+            <Select value={filterStatus} onChange={setFilterStatus} minWidth={130} options={[{value:"All",label:"All Statuses"},"New","Contacted","Converted","Closed"]}/>
+            <Select value={filterProc} onChange={setFilterProc} minWidth={180} options={allProcs.map(p=>({value:p, label:p==="All"?"All Procedures":p}))}/>
           </div>
           <p style={{ fontSize:12.5, color:C.textSm, marginBottom:12 }}>{visible.length} request{visible.length!==1?"s":""}</p>
 
@@ -1838,7 +2081,6 @@ function FacilitatorDashboard() {
             </table>
           </div>
 
-          {/* Mobile card view */}
           <div className="facil-leads-cards">
             {visible.map(l=>(
               <div key={l.id} onClick={()=>setSelectedLead(l)}
@@ -1867,13 +2109,9 @@ function FacilitatorDashboard() {
         </>
       )}
 
-      {/* ── ANALYTICS ── */}
       {tab==="analytics"&&(
         <div style={{ display:"grid", gap:14 }}>
-          {/* Row 1 */}
           <div className="facil-analytics-row" style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(auto-fit,minmax(260px,1fr))", gap:14 }}>
-
-            {/* Gender */}
             <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"20px 22px" }}>
               <h3 style={{ fontWeight:700, fontSize:14, marginBottom:18 }}>Gender Distribution</h3>
               <div style={{ display:"flex", gap:16, alignItems:"center", justifyContent:"center", marginBottom:16 }}>
@@ -1891,7 +2129,6 @@ function FacilitatorDashboard() {
               </div>
             </div>
 
-            {/* Age groups */}
             <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"20px 22px" }}>
               <h3 style={{ fontWeight:700, fontSize:14, marginBottom:16 }}>Age Groups</h3>
               {ageGroups.map(g=>(
@@ -1908,10 +2145,7 @@ function FacilitatorDashboard() {
             </div>
           </div>
 
-          {/* Row 2 */}
           <div className="facil-analytics-row" style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(auto-fit,minmax(260px,1fr))", gap:14 }}>
-
-            {/* Top locations */}
             <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"20px 22px" }}>
               <h3 style={{ fontWeight:700, fontSize:14, marginBottom:16 }}>Top Locations</h3>
               {locationCounts.map(([loc,cnt])=>(
@@ -1927,7 +2161,6 @@ function FacilitatorDashboard() {
               ))}
             </div>
 
-            {/* Requested destinations */}
             <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"20px 22px" }}>
               <h3 style={{ fontWeight:700, fontSize:14, marginBottom:16 }}>Requested Destinations</h3>
               {countryCounts.map(([country,cnt])=>(
@@ -1944,7 +2177,6 @@ function FacilitatorDashboard() {
             </div>
           </div>
 
-          {/* Row 3 — procedures */}
           <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"20px 22px" }}>
             <h3 style={{ fontWeight:700, fontSize:14, marginBottom:16 }}>Procedures Requested</h3>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))", gap:10 }}>
@@ -1979,6 +2211,22 @@ export default function App() {
   const [showFacilitatorModal, setShowFacilitatorModal] = useState(false);
   const [facilitatorClinic, setFacilitatorClinic] = useState(null);
 
+  // Auth state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Bookmarks state (array of provider IDs)
+  const [bookmarks, setBookmarks] = useState([]);
+
+  const toggleBookmark = (providerId) => {
+    setBookmarks(prev =>
+      prev.includes(providerId)
+        ? prev.filter(id => id !== providerId)
+        : [...prev, providerId]
+    );
+  };
+
+  const handleLogin = () => setIsLoggedIn(true);
+
   const openProvider = (prov) => setSelectedProvider(prov);
   const closeProvider = () => setSelectedProvider(null);
   const openFacilitatorModal = (clinic=null) => { setFacilitatorClinic(clinic); setShowFacilitatorModal(true); };
@@ -2000,18 +2248,18 @@ export default function App() {
           ) : (
             <>
               {page==="home"&&<HomePage setPage={setPage} setInitialQuery={setInitialQuery}/>}
-              {page==="chat"&&<ChatPage setPage={setPage} setSelectedProvider={openProvider} initialQuery={initialQuery} setInitialQuery={setInitialQuery} openFacilitatorModal={openFacilitatorModal}/>}
-              {page==="directory"&&<DirectoryPage setPage={setPage} setSelectedProvider={openProvider}/>}
+              {page==="chat"&&<ChatPage setPage={setPage} setSelectedProvider={openProvider} initialQuery={initialQuery} setInitialQuery={setInitialQuery} openFacilitatorModal={openFacilitatorModal} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn}/>}
+              {page==="directory"&&<DirectoryPage setPage={setPage} setSelectedProvider={openProvider} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn}/>}
               {page==="facilitators"&&<FacilitatorsPage setPage={setPage} setSelectedProvider={openProvider}/>}
               {page==="international"&&<InternationalPage setSelectedClinic={setSelectedClinic} openFacilitatorModal={openFacilitatorModal}/>}
-              {page==="login"&&<LoginPage setPage={setPage}/>}
-              {page==="signup"&&<SignupPage setPage={setPage}/>}
+              {page==="login"&&<LoginPage setPage={setPage} onLogin={handleLogin}/>}
+              {page==="signup"&&<SignupPage setPage={setPage} onLogin={handleLogin}/>}
               {page==="become-provider"&&<BecomeProviderPage setPage={setPage}/>}
             </>
           )}
         </>
       )}
-      {selectedProvider && <ProviderModal provider={selectedProvider} onClose={closeProvider} setBookings={setBookings}/>}
+      {selectedProvider && <ProviderModal provider={selectedProvider} onClose={closeProvider} setBookings={setBookings} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn} setPage={setPage}/>}
       {showFacilitatorModal && <FacilitatorModal onClose={closeFacilitatorModal} clinic={facilitatorClinic}/>}
     </div>
   );
