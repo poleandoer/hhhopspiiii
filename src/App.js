@@ -487,9 +487,9 @@ function BecomeProviderPage({ setPage }) {
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))", gap:14, marginBottom:44 }}>
           {[
-            { icon:"", title:"Targeted Reach", desc:"Get discovered by patients actively searching for your specialty in your city." },
-            { icon:"", title:"Seamless Bookings", desc:"Integrated calendar lets patients book directly — reducing admin overhead for your team." },
-            { icon:"", title:"Real-Time Analytics", desc:"Track visits, calls, and bookings from your provider dashboard. Pay only for the leads you receive." },
+            { icon:"→", title:"Targeted Reach", desc:"Get discovered by patients actively searching for your specialty in your city." },
+            { icon:"→", title:"Seamless Bookings", desc:"Integrated calendar lets patients book directly — reducing admin overhead for your team." },
+            { icon:"→", title:"Real-Time Analytics", desc:"Track visits, calls, and bookings from your provider dashboard. Pay only for the leads you receive." },
           ].map(b => (
             <div key={b.title} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:16, padding:"22px 20px", boxShadow:"0 1px 6px rgba(0,0,0,.05)" }}>
               <div style={{ fontWeight:800, fontSize:13, color:C.teal, marginBottom:12, letterSpacing:1 }}>{b.icon}</div>
@@ -516,8 +516,18 @@ function BecomeProviderPage({ setPage }) {
 
 // ─── FACILITATOR CONTACT FORM MODAL ──────────────────────────────────────────
 function FacilitatorModal({ onClose, clinic }) {
-  const [f, setF] = useState({ name:"", email:"", phone:"", procedure:"", country:"", message:"" });
+  const hasClinic = !!clinic;
+  const [f, setF] = useState({
+    name:"", email:"", phone:"",
+    procedure: "",
+    country: hasClinic ? `${clinic.country} — ${clinic.city}` : "",
+    clinicName: hasClinic ? clinic.name : "",
+    message:""
+  });
+  const [selectedProcs, setSelectedProcs] = useState([]);
   const [done, setDone] = useState(false);
+
+  const toggleProc = (p) => setSelectedProcs(prev => prev.includes(p) ? prev.filter(x=>x!==p) : [...prev, p]);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -527,7 +537,7 @@ function FacilitatorModal({ onClose, clinic }) {
   return (
     <div onClick={e=>{ if(e.target===e.currentTarget) onClose(); }} style={{ position:"fixed", inset:0, background:"rgba(10,20,30,.55)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:600, padding:16, backdropFilter:"blur(3px)" }}>
       <div className="fade-up" style={{ background:C.white, borderRadius:20, width:"100%", maxWidth:500, maxHeight:"92vh", overflowY:"auto", boxShadow:"0 24px 60px rgba(0,0,0,.22)" }}>
-        <div style={{ padding:"22px 24px 18px", borderBottom:`1px solid ${C.border}`, display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", top:0, background:C.white, zIndex:10 }}>
+        <div style={{ padding:"22px 24px 18px", borderBottom:`1px solid ${C.border}`, display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", top:0, background:C.white, zIndex:10, borderRadius:"20px 20px 0 0" }}>
           <div>
             <h2 style={{ fontWeight:800, fontSize:18 }}>Talk to a Facilitator</h2>
             <p style={{ color:C.textSm, fontSize:12.5, marginTop:3 }}>Our medical coordinators will reach out within 24 hours.</p>
@@ -546,11 +556,56 @@ function FacilitatorModal({ onClose, clinic }) {
             </div>
           ) : (
             <>
+              {/* Clinic info banner when coming from a clinic */}
+              {hasClinic && (
+                <div style={{ background:C.tealLt, border:`1px solid ${C.teal}25`, borderRadius:12, padding:"14px 16px", marginBottom:18, display:"flex", gap:12, alignItems:"center" }}>
+                  <div style={{ width:42, height:42, borderRadius:12, background:C.white, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:14, color:C.teal, flexShrink:0, border:`1px solid ${C.teal}20` }}>{clinic.image}</div>
+                  <div>
+                    <div style={{ fontWeight:700, fontSize:13.5, color:C.text }}>{clinic.name}</div>
+                    <div style={{ fontSize:12, color:C.textSm }}>{clinic.city}, {clinic.country} {clinic.flag}</div>
+                  </div>
+                </div>
+              )}
+
               <FieldInput label="Full Name *" type="text" value={f.name} onChange={e=>setF(p=>({...p,name:e.target.value}))} placeholder="Your full name" />
               <FieldInput label="Email *" type="email" value={f.email} onChange={e=>setF(p=>({...p,email:e.target.value}))} placeholder="you@example.com" />
               <FieldInput label="Phone Number" type="tel" value={f.phone} onChange={e=>setF(p=>({...p,phone:e.target.value}))} placeholder="+1 416-555-0000" />
-              <FieldInput label="Procedure *" type="text" value={f.procedure} onChange={e=>setF(p=>({...p,procedure:e.target.value}))} placeholder="e.g. Hair transplant, Dental implants, Knee replacement" />
-              <FieldInput label="Preferred country or region (optional)" type="text" value={f.country} onChange={e=>setF(p=>({...p,country:e.target.value}))} placeholder="e.g. Turkey, Southeast Asia, Europe" />
+
+              {/* Clinic & Country — locked when pre-filled */}
+              {hasClinic ? (
+                <>
+                  <div style={{ marginBottom:14 }}>
+                    <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:5 }}>Clinic</label>
+                    <div style={{ padding:"10px 13px", border:`1.5px solid ${C.borderLt}`, borderRadius:9, fontSize:14, background:C.offWhite, color:C.textMd }}>{clinic.name}</div>
+                  </div>
+                  <div style={{ marginBottom:14 }}>
+                    <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:5 }}>Country</label>
+                    <div style={{ padding:"10px 13px", border:`1.5px solid ${C.borderLt}`, borderRadius:9, fontSize:14, background:C.offWhite, color:C.textMd }}>{clinic.city}, {clinic.country}</div>
+                  </div>
+                  {/* Procedure picker from clinic's list */}
+                  <div style={{ marginBottom:14 }}>
+                    <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:8 }}>Procedure(s) *</label>
+                    <div style={{ display:"flex", gap:7, flexWrap:"wrap" }}>
+                      {clinic.procedures.map(p => {
+                        const active = selectedProcs.includes(p);
+                        return (
+                          <button key={p} onClick={()=>toggleProc(p)} style={{ padding:"7px 14px", border:`1.5px solid ${active?C.teal:C.border}`, borderRadius:20, background:active?C.tealLt:C.white, color:active?C.teal:C.textMd, fontSize:13, fontWeight:active?700:400, cursor:"pointer", fontFamily:"inherit", transition:"all .15s", display:"flex", alignItems:"center", gap:5 }}>
+                            {active && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="3"><polyline points="20,6 9,17 4,12"/></svg>}
+                            {p}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {selectedProcs.length === 0 && <p style={{ fontSize:11, color:C.textSm, marginTop:6 }}>Select one or more procedures</p>}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <FieldInput label="Procedure *" type="text" value={f.procedure} onChange={e=>setF(p=>({...p,procedure:e.target.value}))} placeholder="e.g. Hair transplant, Dental implants, Knee replacement" />
+                  <FieldInput label="Preferred country or region (optional)" type="text" value={f.country} onChange={e=>setF(p=>({...p,country:e.target.value}))} placeholder="e.g. Turkey, Southeast Asia, Europe" />
+                </>
+              )}
+
               <div style={{ marginBottom:14 }}>
                 <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:5 }}>Short message (optional)</label>
                 <textarea value={f.message} onChange={e=>setF(p=>({...p,message:e.target.value}))} placeholder="Any additional details or questions…" rows={3}
@@ -661,23 +716,22 @@ function Select({ value, onChange, options, placeholder, minWidth }) {
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
 const FEATURE_ITEMS = [
-  { src: imgAiHealth,  alt:"AI Health Assistant", title:"AI Health Assistant", sub:"Science-based guidance",
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5ACAD6" strokeWidth="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 8v4l3 3"/></svg> },
-  { src: imgProviders, alt:"Provider Directory",   title:"Provider Directory",  sub:"Verified specialists",
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5ACAD6" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> },
-  { src: imgTourism,   alt:"Medical Tourism",      title:"Medical Tourism",     sub:"Facilitator network",
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5ACAD6" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg> },
+  { src: imgAiHealth, title:"AI Health Assistant", sub:"Science-based guidance", page:"chat" },
+  { src: imgProviders, title:"Provider Directory",  sub:"Verified specialists", page:"directory" },
+  { src: imgTourism,   title:"Medical Tourism",     sub:"Find care abroad", page:"international" },
 ];
 
 function HomePage({ setPage, setInitialQuery }) {
   const [q, setQ] = useState("");
   const isMobile = useIsMobile();
   const send = (v) => { const t=v||q; if(!t.trim())return; setInitialQuery(t); setPage("chat"); };
-  const suggestions = ["Find a cardiologist","I have a headache","Hair transplant abroad","Sore throat remedies","Find a facilitator","Find care abroad"];
+  const suggestions = ["Find a cardiologist","I have a headache","Hair transplant abroad","Sore throat remedies"];
 
   return (
-    <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:isMobile?"28px 16px":"40px 16px", background:`linear-gradient(155deg, ${C.white} 50%, ${C.tealBg} 100%)` }}>
-      <div className="fade-up" style={{ textAlign:"center", maxWidth:780, width:"100%", padding:"0 8px" }}>
+    <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", flexDirection:"column", background:`linear-gradient(155deg, ${C.white} 50%, ${C.tealBg} 100%)` }}>
+      {/* Main content centered */}
+      <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:isMobile?"28px 16px 0":"40px 16px 0" }}>
+        <div className="fade-up" style={{ textAlign:"center", maxWidth:780, width:"100%", padding:"0 8px" }}>
 
         {/* Logo — no magnifying glass */}
         <div style={{ display:"inline-flex", alignItems:"center", gap:isMobile?7:10, marginBottom:isMobile?10:18 }}>
@@ -705,43 +759,31 @@ function HomePage({ setPage, setInitialQuery }) {
           ))}
         </div>
 
-        {/* Feature cards */}
-        {isMobile ? (
-          <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-            {FEATURE_ITEMS.map(({alt,title,sub,icon})=>(
-              <div key={title} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, padding:"16px", display:"flex", alignItems:"center", gap:12, textAlign:"left" }}>
-                <div style={{ width:40, height:40, borderRadius:10, background:C.tealLt, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>{icon}</div>
-                <div>
-                  <div style={{ fontWeight:700, fontSize:13 }}>{title}</div>
-                  <div style={{ fontSize:11, color:C.textSm, marginTop:2 }}>{sub}</div>
-                </div>
+        {/* Feature icons — clean, no boxes, clickable, with images */}
+        <div style={{ display:"flex", gap:isMobile?20:40, justifyContent:"center", marginBottom:isMobile?20:30, flexWrap:"wrap" }}>
+          {FEATURE_ITEMS.map(({src,title,sub,page:pg})=>(
+            <button key={title} onClick={()=>setPage(pg)} style={{ background:"none", border:"none", cursor:"pointer", fontFamily:"inherit", display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:"8px 12px", transition:"transform .15s", textAlign:"center" }}
+              onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+              onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+              <div style={{ width:48, height:48, borderRadius:12, overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <img src={src} alt={title} style={{ width:"100%", height:"100%", objectFit:"contain" }}/>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:12, maxWidth:"100%", margin:"0 auto" }}>
-            {FEATURE_ITEMS.map(({src,alt,title,sub})=>(
-              <div key={title} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"14px 12px", textAlign:"center" }}>
-                <div style={{ width:50, height:50, borderRadius:10, background:"transparent", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 10px", overflow:"hidden" }}>
-                  <img src={src} alt={alt} onError={e=>{ e.currentTarget.style.display="none"; e.currentTarget.nextSibling.style.display="flex"; }}
-                    style={{ width:"100%", height:"100%", objectFit:"contain", borderRadius:0 }}/>
-                  <div style={{ display:"none", width:"100%", height:"100%", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:2 }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.textSm} strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-                    <span style={{ fontSize:9, color:C.textSm, fontWeight:600 }}>IMG</span>
-                  </div>
-                </div>
-                <div style={{ fontWeight:700, fontSize:13 }}>{title}</div>
-                <div style={{ fontSize:11, color:C.textSm, marginTop:3 }}>{sub}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div style={{ marginTop:24, borderTop:`1px solid ${C.border}`, paddingTop:18, display:"flex", gap:14, justifyContent:"center", flexWrap:"wrap" }}>
-          <FooterLink onClick={()=>setPage("become-provider")}>Become a Provider</FooterLink>
-          <span style={{ color:C.border }}>·</span>
-          <FooterLink onClick={()=>setPage("international")}>Find Care Abroad</FooterLink>
+              <div style={{ fontWeight:700, fontSize:12.5, color:C.text }}>{title}</div>
+              <div style={{ fontSize:11, color:C.textSm }}>{sub}</div>
+            </button>
+          ))}
         </div>
+
+        </div>
+      </div>
+
+      {/* Footer — pinned to bottom */}
+      <div style={{ background:C.gray, borderTop:`1px solid ${C.border}`, padding:isMobile?"14px 20px":"12px 40px", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
+        <div style={{ display:"flex", gap:20, alignItems:"center", flexWrap:"wrap" }}>
+          <span style={{ fontSize:12, color:C.textSm, cursor:"pointer", fontFamily:"inherit" }} onMouseEnter={e=>e.currentTarget.style.color=C.teal} onMouseLeave={e=>e.currentTarget.style.color=C.textSm}>Privacy Policy</span>
+          <span style={{ fontSize:12, color:C.textSm, cursor:"pointer", fontFamily:"inherit" }} onMouseEnter={e=>e.currentTarget.style.color=C.teal} onMouseLeave={e=>e.currentTarget.style.color=C.textSm}>Terms & Conditions</span>
+        </div>
+        <button className="btn-primary" onClick={()=>setPage("become-provider")} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:20, padding:"8px 22px", fontWeight:700, fontSize:12.5, cursor:"pointer", fontFamily:"inherit" }}>Become a Provider</button>
       </div>
     </div>
   );
@@ -1147,7 +1189,7 @@ function DirectoryPage({ setPage, setSelectedProvider, bookmarks, toggleBookmark
             {p.contracted ? (
               <button className="btn-primary" style={{ width: "100%", padding: "10px", border: "none", borderRadius: 22, background: C.teal, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>Book Appointment</button>
             ) : (
-              <button className="btn-ghost" style={{ width: "100%", padding: "10px", border: `1.5px solid ${C.border}`, borderRadius: 22, background: C.white, color: C.textMd, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>Request Info</button>
+              <button className="btn-ghost" style={{ width: "100%", padding: "10px", border: `1.5px solid ${C.border}`, borderRadius: 22, background: C.white, color: C.textMd, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>Learn More</button>
             )}
           </div>
         ))}
@@ -1417,6 +1459,217 @@ function InternationalClinicProfile({ clinic, onBack, openFacilitatorModal }) {
   );
 }
 
+// ─── PROVIDER PROFILE PAGE ────────────────────────────────────────────────────
+const DEMO_REVIEWS = [
+  { id:1, author:"Emily R.", date:"Feb 28, 2026", rating:5, text:"Absolutely wonderful experience. The doctor was thorough, listened carefully, and explained everything clearly. Highly recommend to anyone looking for quality care." },
+  { id:2, author:"Michael T.", date:"Feb 14, 2026", rating:4, text:"Great doctor, very knowledgeable. The only downside was the wait time — about 25 minutes past my scheduled appointment. But the care itself was excellent." },
+  { id:3, author:"Sarah K.", date:"Jan 30, 2026", rating:5, text:"I've been coming here for over a year and it's consistently great. The staff is friendly, the office is clean, and the doctor genuinely cares about patients." },
+  { id:4, author:"David L.", date:"Jan 15, 2026", rating:4, text:"Professional and efficient. Got my issue resolved in one visit. Would appreciate more flexible scheduling options though." },
+  { id:5, author:"Anna P.", date:"Dec 22, 2025", rating:5, text:"Best healthcare experience I've had in years. The doctor took time to understand my concerns and created a personalized treatment plan." },
+];
+
+function ProviderProfilePage({ provider, onBack, bookmarks, toggleBookmark, isLoggedIn, setPage, setBookings }) {
+  const [showBooking, setShowBooking] = useState(false);
+  const [tab, setTab] = useState("calendar");
+  const [form, setForm] = useState({ name:"",email:"",phone:"",reason:"",time:"" });
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [done, setDone] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [commentRating, setCommentRating] = useState(0);
+  const [comments, setComments] = useState(DEMO_REVIEWS);
+  const [commentDone, setCommentDone] = useState(false);
+  const isMobile = useIsMobile();
+  const scrollRef = useRef(null);
+
+  const today = new Date();
+  const days = Array.from({length:8},(_,i)=>{ const d=new Date(today); d.setDate(today.getDate()+i+1); return d; }).filter(d=>d.getDay()!==0&&d.getDay()!==6);
+
+  const handleBook = () => {
+    if(!form.name||!form.email||!form.phone) return;
+    setBookings(b=>[...b,{...form,provider:provider.name,id:Date.now(),status:"Pending",date:selectedDate?.toDateString()||"TBD"}]);
+    setDone(true);
+  };
+
+  const handleComment = () => {
+    if(!commentText.trim()||!commentRating) return;
+    if(!isLoggedIn) { setPage("signup"); return; }
+    setComments(prev=>[{ id:Date.now(), author:"You", date:"Mar 13, 2026", rating:commentRating, text:commentText }, ...prev]);
+    setCommentText(""); setCommentRating(0); setCommentDone(true);
+    setTimeout(()=>setCommentDone(false),3000);
+  };
+
+  const avgRating = (comments.reduce((a,c)=>a+c.rating,0)/comments.length).toFixed(1);
+
+  return (
+    <div ref={scrollRef} style={{ maxHeight:"calc(100vh - 58px)", overflowY:"auto" }}>
+      <div style={{ maxWidth:900, margin:"0 auto", padding:isMobile?"20px 16px 48px":"32px 24px 60px" }}>
+        {/* Back */}
+        <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", color:C.textSm, fontSize:13.5, fontWeight:600, fontFamily:"inherit", display:"flex", alignItems:"center", gap:6, marginBottom:22, padding:0 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15,18 9,12 15,6"/></svg>
+          Back to Directory
+        </button>
+
+        {/* Header card */}
+        <div className="fade-up" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:20, padding:isMobile?"20px":"28px 30px", marginBottom:20, boxShadow:"0 2px 12px rgba(0,0,0,.06)" }}>
+          <div style={{ display:"flex", gap:18, alignItems:"flex-start", flexWrap:"wrap" }}>
+            <div style={{ width:72, height:72, borderRadius:18, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:22, color:C.teal, flexShrink:0, border:`1px solid ${C.teal}20` }}>{provider.image}</div>
+            <div style={{ flex:1, minWidth:200 }}>
+              <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap", marginBottom:6 }}>
+                <h1 style={{ fontSize:isMobile?20:24, fontWeight:800, margin:0 }}>{provider.name}</h1>
+                {provider.contracted && <span style={{ background:C.amberLt, color:"#B45309", fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:20 }}>Featured</span>}
+              </div>
+              <div style={{ color:C.textSm, fontSize:14, marginBottom:8 }}>{provider.specialty}</div>
+              <div style={{ display:"flex", gap:14, flexWrap:"wrap", fontSize:13, color:C.textSm, marginBottom:10 }}>
+                <span style={{ color:C.amber, fontWeight:700 }}>★ {avgRating} <span style={{ fontWeight:400 }}>({comments.length} reviews)</span></span>
+                <span>{provider.address}</span>
+                <span>{provider.hours}</span>
+                <span>{provider.city}</span>
+              </div>
+              <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                {provider.tags?.map(t=><span key={t} style={{ background:C.tealLt, color:C.teal, fontSize:12, padding:"3px 11px", borderRadius:18, fontWeight:600 }}>{t}</span>)}
+              </div>
+            </div>
+            <BookmarkButton providerId={provider.id} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn} setPage={setPage} size={24} />
+          </div>
+          {/* Action buttons */}
+          <div style={{ display:"flex", gap:10, marginTop:20, flexWrap:"wrap" }}>
+            {provider.contracted && <button className="btn-primary" onClick={()=>setShowBooking(s=>!s)} style={{ flex:1, minWidth:120, background:C.teal, color:"#fff", border:"none", borderRadius:12, padding:"12px", fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:"inherit" }}>Book Appointment</button>}
+            <a href={`tel:${provider.phone}`} style={{ flex:1, minWidth:120, background:C.white, color:C.teal, border:`2px solid ${C.teal}`, borderRadius:12, padding:"12px", fontWeight:700, fontSize:14, cursor:"pointer", textDecoration:"none", display:"flex", alignItems:"center", justifyContent:"center" }}>Call {provider.phone}</a>
+            <button className="btn-ghost" style={{ flex:1, minWidth:120, background:C.white, color:C.textMd, border:`1.5px solid ${C.border}`, borderRadius:12, padding:"12px", fontWeight:600, fontSize:14, cursor:"pointer", fontFamily:"inherit" }}>Website</button>
+          </div>
+        </div>
+
+        {/* Booking section */}
+        {showBooking && !done && provider.contracted && (
+          <div className="fade-up" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:16, padding:"22px 24px", marginBottom:20, boxShadow:"0 1px 6px rgba(0,0,0,.04)" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
+              <h2 style={{ fontSize:17, fontWeight:800 }}>Book Appointment</h2>
+              <button onClick={()=>setShowBooking(false)} style={{ background:"none",border:"none",fontSize:20,cursor:"pointer",color:C.textSm }}>×</button>
+            </div>
+            {provider.hasCalendar ? (
+              <>
+                <div style={{ display:"flex",gap:4,background:C.gray,borderRadius:10,padding:3,marginBottom:14 }}>
+                  {[["calendar","Pick a slot"],["form","Request time"]].map(([t,l])=><button key={t} onClick={()=>setTab(t)} style={{ flex:1,padding:"7px",border:"none",borderRadius:8,background:tab===t?C.white:"transparent",fontWeight:tab===t?700:400,fontSize:13,cursor:"pointer",color:tab===t?C.text:C.textSm,fontFamily:"inherit" }}>{l}</button>)}
+                </div>
+                {tab==="calendar"&&(
+                  <>
+                    <p style={{ fontSize:10.5,fontWeight:700,color:C.textSm,marginBottom:8 }}>SELECT DATE</p>
+                    <div style={{ display:"flex",gap:7,overflowX:"auto",paddingBottom:4,marginBottom:12 }}>
+                      {days.slice(0,7).map((d,i)=>(
+                        <button key={i} onClick={()=>setSelectedDate(d)} style={{ flexShrink:0,width:50,padding:"8px 0",border:`1.5px solid ${selectedDate?.toDateString()===d.toDateString()?C.teal:C.border}`,borderRadius:10,background:selectedDate?.toDateString()===d.toDateString()?C.tealLt:C.white,cursor:"pointer",textAlign:"center",fontFamily:"inherit" }}>
+                          <div style={{ fontSize:9.5,color:C.textSm,fontWeight:700 }}>{d.toLocaleDateString("en",{weekday:"short"}).toUpperCase()}</div>
+                          <div style={{ fontSize:15,fontWeight:800,color:selectedDate?.toDateString()===d.toDateString()?C.teal:C.text,marginTop:2 }}>{d.getDate()}</div>
+                        </button>
+                      ))}
+                    </div>
+                    {selectedDate&&(
+                      <>
+                        <p style={{ fontSize:10.5,fontWeight:700,color:C.textSm,marginBottom:8 }}>SELECT TIME</p>
+                        <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:16 }}>
+                          {ALL_TIMES.map(t=>(
+                            <button key={t} onClick={()=>setForm(f=>({...f,time:t}))} style={{ padding:"5px 12px",border:`1.5px solid ${form.time===t?C.teal:C.border}`,borderRadius:18,background:form.time===t?C.tealLt:C.white,color:form.time===t?C.teal:C.textSm,fontSize:12,cursor:"pointer",fontWeight:form.time===t?700:400,fontFamily:"inherit" }}>{t}</button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              <div style={{ background:C.amberLt,border:`1px solid #FDE68A`,borderRadius:10,padding:11,marginBottom:14,fontSize:13,color:"#92400E" }}>
+                No calendar connected — submit a request and the provider will confirm.
+              </div>
+            )}
+            {[["Full Name *","name","text"],["Email *","email","email"],["Phone *","phone","tel"],["Reason for Visit","reason","text"]].map(([l,k,t])=>(
+              <div key={k} style={{ marginBottom:11 }}>
+                <label style={{ fontSize:12,fontWeight:700,color:C.text,display:"block",marginBottom:4 }}>{l}</label>
+                <input type={t} value={form[k]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} style={{ width:"100%",padding:"9px 12px",border:`1.5px solid ${C.border}`,borderRadius:9,fontSize:13.5,outline:"none",fontFamily:"inherit" }} onFocus={e=>e.target.style.borderColor=C.teal} onBlur={e=>e.target.style.borderColor=C.border}/>
+              </div>
+            ))}
+            <button className="btn-primary" onClick={handleBook} style={{ width:"100%",background:C.teal,color:"#fff",border:"none",borderRadius:10,padding:"12px",fontWeight:700,fontSize:14,cursor:"pointer",fontFamily:"inherit",marginTop:4 }}>Confirm Booking</button>
+          </div>
+        )}
+        {done && (
+          <div className="fade-up" style={{ background:C.tealLt, border:`1px solid ${C.teal}40`, borderRadius:16, padding:"24px", textAlign:"center", marginBottom:20 }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2.5" style={{ marginBottom:10 }}><polyline points="20,6 9,17 4,12"/></svg>
+            <h3 style={{ fontWeight:800,fontSize:17,marginBottom:6 }}>Booking Confirmed!</h3>
+            <p style={{ color:C.textSm,fontSize:13 }}>Confirmation sent to <strong>{form.email}</strong>.</p>
+          </div>
+        )}
+
+        {/* About */}
+        <div className="fade-up" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:16, padding:"22px 24px", marginBottom:20, boxShadow:"0 1px 6px rgba(0,0,0,.04)" }}>
+          <h2 style={{ fontWeight:800, fontSize:16, marginBottom:12 }}>About</h2>
+          <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1fr", gap:16 }}>
+            <div>
+              <div style={{ color:C.green, fontWeight:700, fontSize:12, marginBottom:6 }}>✓ What patients love</div>
+              <p style={{ color:C.textMd, fontSize:13.5, lineHeight:1.7 }}>Highly professional, thorough explanations and personalized care. Patients consistently praise the attentive approach and clear communication.</p>
+            </div>
+            <div>
+              <div style={{ color:C.amber, fontWeight:700, fontSize:12, marginBottom:6 }}>△ Things to know</div>
+              <p style={{ color:C.textMd, fontSize:13.5, lineHeight:1.7 }}>Wait times may be longer during peak hours. Limited parking nearby. Recommended to arrive 10 minutes early for new patients.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Reviews */}
+        <div className="fade-up" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:16, padding:"22px 24px", marginBottom:20, boxShadow:"0 1px 6px rgba(0,0,0,.04)" }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18, flexWrap:"wrap", gap:10 }}>
+            <h2 style={{ fontWeight:800, fontSize:16, margin:0 }}>Reviews ({comments.length})</h2>
+            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+              <span style={{ fontSize:24, fontWeight:800, color:C.teal }}>{avgRating}</span>
+              <div>
+                <div style={{ display:"flex", gap:2 }}>{[1,2,3,4,5].map(s=><span key={s} style={{ color:s<=Math.round(avgRating)?C.amber:C.grayMd, fontSize:14 }}>★</span>)}</div>
+                <div style={{ fontSize:10.5, color:C.textSm }}>{comments.length} reviews</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Write a review */}
+          <div style={{ background:C.offWhite, borderRadius:14, padding:"16px 18px", marginBottom:20, border:`1px solid ${C.borderLt}` }}>
+            <div style={{ fontWeight:700, fontSize:13.5, marginBottom:10 }}>Leave a review</div>
+            <div style={{ display:"flex", gap:4, marginBottom:10 }}>
+              {[1,2,3,4,5].map(s=>(
+                <button key={s} onClick={()=>setCommentRating(s)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:22, color:s<=commentRating?C.amber:C.grayMd, transition:"transform .1s", padding:0 }}
+                  onMouseEnter={e=>e.currentTarget.style.transform="scale(1.2)"}
+                  onMouseLeave={e=>e.currentTarget.style.transform="none"}>★</button>
+              ))}
+            </div>
+            <textarea value={commentText} onChange={e=>setCommentText(e.target.value)} placeholder="Share your experience…" rows={3}
+              style={{ width:"100%", padding:"10px 14px", border:`1.5px solid ${C.border}`, borderRadius:10, fontSize:13.5, outline:"none", fontFamily:"inherit", resize:"vertical", color:C.text, marginBottom:10 }}
+              onFocus={e=>e.target.style.borderColor=C.teal} onBlur={e=>e.target.style.borderColor=C.border}/>
+            <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+              <button className="btn-primary" onClick={handleComment} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:10, padding:"9px 22px", fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>
+                {isLoggedIn ? "Submit Review" : "Sign Up to Review"}
+              </button>
+              {commentDone && <span style={{ color:C.green, fontSize:12.5, fontWeight:600 }}>✓ Review posted!</span>}
+            </div>
+          </div>
+
+          {/* Reviews list */}
+          <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
+            {comments.map(r=>(
+              <div key={r.id} style={{ borderBottom:`1px solid ${C.borderLt}`, paddingBottom:14 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6, flexWrap:"wrap", gap:6 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                    <div style={{ width:32, height:32, borderRadius:10, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:12, color:C.teal }}>{r.author.charAt(0)}</div>
+                    <div>
+                      <div style={{ fontWeight:700, fontSize:13 }}>{r.author}</div>
+                      <div style={{ fontSize:11, color:C.textSm }}>{r.date}</div>
+                    </div>
+                  </div>
+                  <div style={{ display:"flex", gap:1 }}>{[1,2,3,4,5].map(s=><span key={s} style={{ color:s<=r.rating?C.amber:C.grayMd, fontSize:12 }}>★</span>)}</div>
+                </div>
+                <p style={{ color:C.textMd, fontSize:13.5, lineHeight:1.7, margin:0 }}>{r.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── PROVIDER MODAL ───────────────────────────────────────────────────────────
 const BOOKED = ["9:00","10:30","14:00"];
 
@@ -1468,7 +1721,7 @@ function ProviderModal({ provider, onClose, setBookings, bookmarks, toggleBookma
         </div>
         <div style={{ padding:"20px 22px" }}>
           <div style={{ display:"flex", gap:9, marginBottom:22, flexWrap:"wrap" }}>
-            <button className="btn-primary" onClick={()=>setShowBooking(true)} style={{ flex:1,minWidth:110,background:C.teal,color:"#fff",border:"none",borderRadius:10,padding:"10px",fontWeight:700,fontSize:13.5,cursor:"pointer",fontFamily:"inherit" }}>Book Appointment</button>
+            {provider.contracted && <button className="btn-primary" onClick={()=>setShowBooking(true)} style={{ flex:1,minWidth:110,background:C.teal,color:"#fff",border:"none",borderRadius:10,padding:"10px",fontWeight:700,fontSize:13.5,cursor:"pointer",fontFamily:"inherit" }}>Book Appointment</button>}
             <a href={`tel:${provider.phone}`} style={{ flex:1,minWidth:110,background:C.white,color:C.teal,border:`2px solid ${C.teal}`,borderRadius:10,padding:"10px",fontWeight:700,fontSize:13.5,cursor:"pointer",textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center" }}>Call</a>
             <button className="btn-ghost" style={{ flex:1,minWidth:110,background:C.white,color:C.textMd,border:`1.5px solid ${C.border}`,borderRadius:10,padding:"10px",fontWeight:600,fontSize:13.5,cursor:"pointer",fontFamily:"inherit" }}>Website</button>
           </div>
@@ -1746,6 +1999,162 @@ function ProviderDashboard() {
     );
   }
 
+  function PortalTab() {
+    const [workDays, setWorkDays] = useState({ Mon:true, Tue:true, Wed:true, Thu:true, Fri:true, Sat:false, Sun:false });
+    const [startTime, setStartTime] = useState("09:00");
+    const [endTime, setEndTime] = useState("17:00");
+    const [apptLength, setApptLength] = useState(30);
+    const [portalSaved, setPortalSaved] = useState(false);
+    const [editsPending, setEditsPending] = useState(false);
+    const [bookingMode, setBookingMode] = useState("calendar");
+
+    const toggleDay = (d) => setWorkDays(prev=>({...prev,[d]:!prev[d]}));
+    const handleSave = () => { setPortalSaved(true); setEditsPending(true); setTimeout(()=>setPortalSaved(false),3000); };
+
+    return (
+      <div style={{ display:"grid", gap:16 }}>
+        {/* Scheduling */}
+        <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"24px 26px" }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20, flexWrap:"wrap", gap:10 }}>
+            <div>
+              <h3 style={{ fontWeight:800, fontSize:16, marginBottom:4 }}>Scheduling & Availability</h3>
+              <p style={{ color:C.textSm, fontSize:12.5 }}>Set your working days, hours, and appointment duration. Patients will only see available slots based on these settings.</p>
+            </div>
+            {editsPending && <Badge bg={C.amberLt} color={C.amber}>Pending admin review</Badge>}
+          </div>
+
+          {/* Working days */}
+          <div style={{ marginBottom:24 }}>
+            <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:10, letterSpacing:.3 }}>WORKING DAYS</label>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+              {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>(
+                <button key={d} onClick={()=>toggleDay(d)}
+                  style={{ width:52, padding:"10px 0", border:`1.5px solid ${workDays[d]?C.teal:C.border}`, borderRadius:10, background:workDays[d]?C.tealLt:C.white, color:workDays[d]?C.teal:C.textSm, fontSize:13, fontWeight:workDays[d]?700:500, cursor:"pointer", fontFamily:"inherit", transition:"all .15s", textAlign:"center" }}>
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Working hours */}
+          <div style={{ marginBottom:24 }}>
+            <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:10, letterSpacing:.3 }}>WORKING HOURS</label>
+            <div style={{ display:"flex", gap:12, alignItems:"center", flexWrap:"wrap" }}>
+              <div>
+                <div style={{ fontSize:11, color:C.textSm, marginBottom:4 }}>Start</div>
+                <select value={startTime} onChange={e=>setStartTime(e.target.value)}
+                  style={{ padding:"9px 14px", border:`1.5px solid ${C.border}`, borderRadius:10, fontSize:13.5, fontFamily:"inherit", color:C.text, background:C.white, cursor:"pointer", outline:"none", minWidth:100 }}>
+                  {["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00"].map(t=><option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <span style={{ color:C.textSm, fontWeight:600, marginTop:18 }}>to</span>
+              <div>
+                <div style={{ fontSize:11, color:C.textSm, marginBottom:4 }}>End</div>
+                <select value={endTime} onChange={e=>setEndTime(e.target.value)}
+                  style={{ padding:"9px 14px", border:`1.5px solid ${C.border}`, borderRadius:10, fontSize:13.5, fontFamily:"inherit", color:C.text, background:C.white, cursor:"pointer", outline:"none", minWidth:100 }}>
+                  {["14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"].map(t=><option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Appointment length */}
+          <div style={{ marginBottom:24 }}>
+            <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:10, letterSpacing:.3 }}>APPOINTMENT LENGTH</label>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+              {[15,20,30,45,60,90].map(m=>(
+                <button key={m} onClick={()=>setApptLength(m)}
+                  style={{ padding:"9px 18px", border:`1.5px solid ${apptLength===m?C.teal:C.border}`, borderRadius:10, background:apptLength===m?C.tealLt:C.white, color:apptLength===m?C.teal:C.textSm, fontSize:13, fontWeight:apptLength===m?700:500, cursor:"pointer", fontFamily:"inherit", transition:"all .15s" }}>
+                  {m} min
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Summary + Save */}
+          <div style={{ background:C.offWhite, borderRadius:12, padding:"14px 18px", marginBottom:18, border:`1px solid ${C.borderLt}` }}>
+            <div style={{ fontSize:12, fontWeight:700, color:C.textSm, marginBottom:8, letterSpacing:.3 }}>CURRENT SCHEDULE SUMMARY</div>
+            <div style={{ fontSize:13.5, color:C.text, lineHeight:1.8 }}>
+              <strong>Days:</strong> {Object.entries(workDays).filter(([,v])=>v).map(([d])=>d).join(", ") || "None selected"}<br/>
+              <strong>Hours:</strong> {startTime} – {endTime}<br/>
+              <strong>Appointment:</strong> {apptLength} minutes per session
+            </div>
+          </div>
+
+          <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+            <button className="btn-primary" onClick={handleSave} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:10, padding:"11px 28px", fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:"inherit" }}>Save Schedule</button>
+            {portalSaved && <span style={{ color:C.green, fontSize:12.5, fontWeight:600 }}>✓ Saved — pending admin review</span>}
+          </div>
+        </div>
+
+        {/* Calendar integration */}
+        <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"24px 26px" }}>
+          <h3 style={{ fontWeight:800, fontSize:16, marginBottom:4 }}>Calendar Integration</h3>
+          <p style={{ color:C.textSm, fontSize:12.5, marginBottom:18 }}>Connect your calendar so patients can book directly into your available slots.</p>
+          <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
+            {[
+              { name:"Google Calendar", connected:true, color:"#4285F4" },
+              { name:"Microsoft Outlook", connected:false, color:"#0078D4" },
+            ].map(cal=>(
+              <div key={cal.name} style={{ flex:1, minWidth:200, border:`1.5px solid ${cal.connected?C.green:C.border}`, borderRadius:12, padding:"16px 18px", display:"flex", alignItems:"center", gap:12, background:cal.connected?C.greenLt:C.white }}>
+                <div style={{ width:36, height:36, borderRadius:10, background:cal.color+"18", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <span style={{ fontWeight:800, fontSize:14, color:cal.color }}>{cal.name.charAt(0)}</span>
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontWeight:700, fontSize:13 }}>{cal.name}</div>
+                  <div style={{ fontSize:11.5, color:cal.connected?C.green:C.textSm }}>{cal.connected?"Connected":"Not connected"}</div>
+                </div>
+                <button style={{ padding:"6px 14px", border:`1.5px solid ${cal.connected?C.green:C.teal}`, borderRadius:8, background:cal.connected?C.white:C.tealLt, color:cal.connected?C.green:C.teal, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>
+                  {cal.connected?"Disconnect":"Connect"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Walk-in / Booking mode */}
+        <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"24px 26px" }}>
+          <h3 style={{ fontWeight:800, fontSize:16, marginBottom:4 }}>Booking Mode</h3>
+          <p style={{ color:C.textSm, fontSize:12.5, marginBottom:18 }}>Choose how patients can schedule visits with you.</p>
+          <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+            {[
+              { mode:"calendar", label:"Calendar Booking", desc:"Patients pick a date & time slot",
+                icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+              { mode:"request", label:"Request Only", desc:"Patients submit a request, you confirm",
+                icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
+              { mode:"walkin", label:"Walk-in Only", desc:"No online booking — walk-in patients only",
+                icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="5" r="2"/><path d="M10 22V18L7 15V11a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4l-3 3v4"/></svg> },
+            ].map(opt=>{
+              const active = bookingMode===opt.mode;
+              return (
+                <button key={opt.mode} onClick={()=>setBookingMode(opt.mode)} style={{ flex:1, minWidth:160, padding:"18px 16px", border:`2px solid ${active?C.teal:C.border}`, borderRadius:14, background:active?C.tealLt:C.white, cursor:"pointer", fontFamily:"inherit", textAlign:"left", transition:"all .18s" }}>
+                  <div style={{ width:36, height:36, borderRadius:10, background:active?C.white:C.gray, display:"flex", alignItems:"center", justifyContent:"center", color:active?C.teal:C.textSm, marginBottom:10 }}>{opt.icon}</div>
+                  <div style={{ fontWeight:700, fontSize:13.5, color:active?C.teal:C.text, marginBottom:4 }}>{opt.label}</div>
+                  <div style={{ fontSize:11.5, color:C.textSm, lineHeight:1.5 }}>{opt.desc}</div>
+                  {active && <div style={{ marginTop:10, display:"flex", alignItems:"center", gap:5, color:C.teal, fontSize:11.5, fontWeight:700 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20,6 9,17 4,12"/></svg>
+                    Active
+                  </div>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Admin notice */}
+        <div style={{ background:C.amberLt, border:`1px solid #FDE68A`, borderRadius:12, padding:"14px 18px", display:"flex", gap:12, alignItems:"flex-start" }}>
+          <div style={{ width:28, height:28, borderRadius:8, background:"#FDE68A", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2.5"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          </div>
+          <div>
+            <div style={{ fontWeight:700, fontSize:13, color:"#92400E", marginBottom:3 }}>All changes require admin approval</div>
+            <div style={{ fontSize:12.5, color:"#78350F", lineHeight:1.6 }}>Schedule changes, profile edits, and booking mode updates will be reviewed by the Hospital.com team before going live. You'll receive an email notification once approved.</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth:980, margin:"0 auto", padding:"24px 16px" }}>
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:22, flexWrap:"wrap", gap:12 }}>
@@ -1760,7 +2169,7 @@ function ProviderDashboard() {
         </div>
       </div>
       <div style={{ display:"flex", gap:3, background:C.gray, borderRadius:11, padding:3, marginBottom:22, width:"fit-content", overflowX:"auto" }}>
-        {["overview","leads","calendar","profile"].map(t=>(
+        {["overview","leads","calendar","portal","profile"].map(t=>(
           <button key={t} onClick={()=>setTab(t)} style={{ padding:"7px 18px", border:"none", borderRadius:9, background:tab===t?C.white:"transparent", fontWeight:tab===t?700:400, fontSize:13, cursor:"pointer", color:tab===t?C.text:C.textSm, boxShadow:tab===t?"0 1px 4px rgba(0,0,0,.08)":"none", textTransform:"capitalize", whiteSpace:"nowrap", fontFamily:"inherit", transition:"all .15s" }}>{t}</button>
         ))}
       </div>
@@ -1807,6 +2216,7 @@ function ProviderDashboard() {
       )}
       {tab==="leads"&&<LeadsTab/>}
       {tab==="calendar"&&<DemoCalendar events={events} setEvents={setEvents}/>}
+      {tab==="portal"&&<PortalTab/>}
       {tab==="profile"&&<ProfileTab/>}
     </div>
   );
@@ -1993,7 +2403,7 @@ function FacilitatorDashboard() {
           <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:12, overflow:"hidden" }}>
             <div style={{ padding:"14px 18px", borderBottom:`1px solid ${C.border}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
               <h3 style={{ fontWeight:700, fontSize:14 }}>Recent Requests</h3>
-              <button onClick={()=>setTab("leads")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, fontSize:12.5, cursor:"pointer", fontFamily:"inherit" }}>View all </button>
+              <button onClick={()=>setTab("leads")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, fontSize:12.5, cursor:"pointer", fontFamily:"inherit" }}>View all →</button>
             </div>
             <div style={{ overflowX:"auto" }}>
               <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13, minWidth:520 }}>
@@ -2203,6 +2613,7 @@ function FacilitatorDashboard() {
 export default function App() {
   const [page, setPage] = useState("home");
   const [selectedProvider, setSelectedProvider] = useState(null);
+  const [selectedProviderProfile, setSelectedProviderProfile] = useState(null);
   const [, setBookings] = useState([]);
   const [initialQuery, setInitialQuery] = useState("");
   const [isProviderView, setIsProviderView] = useState(false);
@@ -2229,17 +2640,27 @@ export default function App() {
 
   const openProvider = (prov) => setSelectedProvider(prov);
   const closeProvider = () => setSelectedProvider(null);
-  const openFacilitatorModal = (clinic=null) => { setFacilitatorClinic(clinic); setShowFacilitatorModal(true); };
+  const openFacilitatorModal = (clinic=null) => { setFacilitatorClinic(clinic?.id ? clinic : null); setShowFacilitatorModal(true); };
   const closeFacilitatorModal = () => { setShowFacilitatorModal(false); setFacilitatorClinic(null); };
 
   return (
     <div style={{ fontFamily:"'DM Sans', sans-serif", minHeight:"100vh", background:C.offWhite, color:C.text }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet"/>
       <style>{GLOBAL_CSS}</style>
-      <Nav setPage={p=>{ setSelectedClinic(null); setPage(p); }} isProviderView={isProviderView} setIsProviderView={setIsProviderView} isFacilitatorView={isFacilitatorView} setIsFacilitatorView={setIsFacilitatorView}/>
+      <Nav setPage={p=>{ setSelectedClinic(null); setSelectedProviderProfile(null); setPage(p); }} isProviderView={isProviderView} setIsProviderView={setIsProviderView} isFacilitatorView={isFacilitatorView} setIsFacilitatorView={setIsFacilitatorView}/>
       {isProviderView ? <ProviderDashboard/> : isFacilitatorView ? <FacilitatorDashboard/> : (
         <>
-          {selectedClinic ? (
+          {selectedProviderProfile ? (
+            <ProviderProfilePage
+              provider={selectedProviderProfile}
+              onBack={()=>setSelectedProviderProfile(null)}
+              bookmarks={bookmarks}
+              toggleBookmark={toggleBookmark}
+              isLoggedIn={isLoggedIn}
+              setPage={setPage}
+              setBookings={setBookings}
+            />
+          ) : selectedClinic ? (
             <InternationalClinicProfile
               clinic={selectedClinic}
               onBack={()=>setSelectedClinic(null)}
@@ -2249,7 +2670,7 @@ export default function App() {
             <>
               {page==="home"&&<HomePage setPage={setPage} setInitialQuery={setInitialQuery}/>}
               {page==="chat"&&<ChatPage setPage={setPage} setSelectedProvider={openProvider} initialQuery={initialQuery} setInitialQuery={setInitialQuery} openFacilitatorModal={openFacilitatorModal} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn}/>}
-              {page==="directory"&&<DirectoryPage setPage={setPage} setSelectedProvider={openProvider} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn}/>}
+              {page==="directory"&&<DirectoryPage setPage={setPage} setSelectedProvider={prov=>setSelectedProviderProfile(prov)} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn}/>}
               {page==="facilitators"&&<FacilitatorsPage setPage={setPage} setSelectedProvider={openProvider}/>}
               {page==="international"&&<InternationalPage setSelectedClinic={setSelectedClinic} openFacilitatorModal={openFacilitatorModal}/>}
               {page==="login"&&<LoginPage setPage={setPage} onLogin={handleLogin}/>}
