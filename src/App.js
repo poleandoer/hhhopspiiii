@@ -1,7 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import imgAiHealth  from "./images/ai-health.png";
-import imgProviders from "./images/providers.png";
-import imgTourism   from "./images/tourism.png";
 import imgAiAvatar  from "./images/ai-avatar.png";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
@@ -1081,9 +1078,6 @@ const HOME_PROCEDURES = [
   "Teeth Cleaning","Annual Checkup","Skin Exam","Eye Exam","Physical Therapy","Botox","Blood Work","Allergy Testing","Colonoscopy","Knee Replacement","Hair Transplant","LASIK"
 ];
 
-const HOME_INSURANCE = [
-  "Aetna","Blue Cross Blue Shield","Cigna","UnitedHealthcare","Humana","Kaiser Permanente","Medicare","Medicaid"
-];
 
 const HOME_REASONS = [
   { icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, title:"Verified Providers", desc:"Every provider is credentialed and reviewed by real patients." },
@@ -2927,12 +2921,12 @@ const DEMO_REVIEWS = [
 ];
 
 function ProviderProfilePage({ provider, onBack, bookmarks, toggleBookmark, isLoggedIn, setPage, setBookings }) {
-  const [showBooking, setShowBooking] = useState(false);
-  const [tab, setTab] = useState("calendar");
+  const [setShowBooking] = useState(false);
+  const [setTab] = useState("calendar");
   const [form, setForm] = useState({ name:"",email:"",phone:"",reason:"",time:"" });
   const [selectedDate, setSelectedDate] = useState(null);
   const [done, setDone] = useState(false);
-  const [commentText, setCommentText] = useState("");
+  const [commentText, setCommentText] = useState(""); 
   const [commentRating, setCommentRating] = useState(0);
   const [comments, setComments] = useState(DEMO_REVIEWS);
   const [commentDone, setCommentDone] = useState(false);
