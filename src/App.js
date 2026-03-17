@@ -1226,7 +1226,7 @@ function AccountTab({ role }) {
   };
 
   return (
-    <div style={{ maxWidth:600, display:"grid", gap:16 }}>
+    <div style={{ maxWidth:600, display:"grid", gap:16, margin:"0 auto" }}>
       {/* Personal Info */}
       <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"24px 26px" }}>
         <h3 style={{ fontWeight:700, fontSize:16, marginBottom:18 }}>Account Information</h3>
@@ -1596,7 +1596,7 @@ function HomePage({ setPage, setInitialQuery, setInitialSpecialty, openProviderP
         <div style={{ maxWidth:1100, margin:"0 auto" }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
             <div style={{ fontWeight:700, fontSize:isMobile?16:20 }}>Top-rated specialists</div>
-            <button onClick={()=>setPage("directory")} style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>View all →</button>
+            <button onClick={()=>setPage("directory")} style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>View all </button>
           </div>
           <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(3, 1fr)", gap:14 }}>
             {PROVIDERS.filter(p=>p.rating>=4.7).slice(0,3).map(p=>(
@@ -1621,7 +1621,7 @@ function HomePage({ setPage, setInitialQuery, setInitialSpecialty, openProviderP
         <div style={{ maxWidth:1100, margin:"0 auto" }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
             <div style={{ fontWeight:700, fontSize:isMobile?16:20 }}>Top-rated clinics worldwide</div>
-            <button onClick={()=>setPage("international")} style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Explore →</button>
+            <button onClick={()=>setPage("international")} style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Explore </button>
           </div>
           <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(3, 1fr)", gap:14 }}>
             {INTL_CLINICS.filter(c=>c.rating>=4.8).slice(0,3).map(c=>(
@@ -2642,9 +2642,6 @@ function InternationalPage({ setSelectedClinic, openFacilitatorModal }) {
         <div style={{ maxWidth:960, margin:"0 auto", display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1px 1fr", gap:isMobile?24:40 }}>
           <div>
             <div style={{ fontWeight:700, fontSize:isMobile?16:18, marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
-              <div style={{ width:28, height:28, borderRadius:8, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
-              </div>
               Popular Specialties
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"4px 20px" }}>
@@ -2658,9 +2655,6 @@ function InternationalPage({ setSelectedClinic, openFacilitatorModal }) {
           {!isMobile && <div style={{ background:C.border, width:1 }} />}
           <div>
             <div style={{ fontWeight:700, fontSize:isMobile?16:18, marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
-              <div style={{ width:28, height:28, borderRadius:8, background:C.purpleLt, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.purple} strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-              </div>
               Popular Procedures
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"4px 20px" }}>
@@ -3147,7 +3141,7 @@ function ProviderProfilePage({ provider, onBack, bookmarks, toggleBookmark, isLo
                 <div>
                   <div style={{ fontWeight:700, fontSize:14, marginBottom:4 }}>{provider.address}</div>
                   <div style={{ fontSize:13, color:C.textSm, marginBottom:8 }}>{provider.city}</div>
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.address+", "+provider.city)}`} target="_blank" rel="noopener noreferrer" style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit", padding:0, textDecoration:"none" }}>Get directions →</a>
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.address+", "+provider.city)}`} target="_blank" rel="noopener noreferrer" style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit", padding:0, textDecoration:"none" }}>Get directions </a>
                 </div>
               </div>
             </div>
@@ -4028,8 +4022,7 @@ function ProviderDashboard({ tab, setTab }) {
     <div style={{ maxWidth:980, margin:"0 auto", padding:"24px 16px" }}>
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:22, flexWrap:"wrap", gap:12 }}>
         <div>
-          <h1 style={{ fontSize:20, fontWeight:800 }}>Provider Dashboard</h1>
-          <p style={{ color:C.textSm, fontSize:13, marginTop:2 }}>Glow Medical Spa · Partner</p>
+
         </div>
       </div>
       {tab==="overview"&&(
