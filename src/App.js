@@ -1,7 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import imgAiHealth  from "./images/ai-health.png";
-import imgProviders from "./images/providers.png";
-import imgTourism   from "./images/tourism.png";
 import imgAiAvatar  from "./images/ai-avatar.png";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
@@ -1107,10 +1104,6 @@ const HOME_PROCEDURES = [
   "Teeth Cleaning","Annual Checkup","Skin Exam","Eye Exam","Physical Therapy","Botox","Blood Work","Allergy Testing","Colonoscopy","Knee Replacement","Hair Transplant","LASIK"
 ];
 
-const HOME_INSURANCE = [
-  "Aetna","Blue Cross Blue Shield","Cigna","UnitedHealthcare","Humana","Kaiser Permanente","Medicare","Medicaid"
-];
-
 const HOME_REASONS = [
   { icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, title:"Verified Providers", desc:"Every provider is credentialed and reviewed by real patients." },
   { icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, title:"Book Instantly", desc:"Schedule appointments online 24/7 — no phone calls needed." },
@@ -1119,67 +1112,6 @@ const HOME_REASONS = [
 ];
 
 // ─── HOME INSURANCE LIST ─────────────────────────────────────────────────────
-const HOME_INS_DATA = [
-  { name:"Aetna", color:"#7B2D8E", plans:["Aetna Choice POS II","Aetna HMO","Aetna PPO","Aetna Medicare Advantage","Aetna Open Access"] },
-  { name:"BlueCross BlueShield", color:"#0073CF", plans:["BCBS PPO","BCBS HMO","BCBS Blue Card","BCBS Federal","BCBS Medicare Supplement"] },
-  { name:"Cigna", color:"#E87722", plans:["Cigna PPO","Cigna HMO","Cigna Open Access Plus","Cigna EPO","Cigna Medicare Advantage"] },
-  { name:"UnitedHealthcare", color:"#002677", plans:["UHC Choice Plus","UHC Navigate","UHC Options PPO","UHC Medicare Advantage","UHC Dual Complete"] },
-  { name:"Medicare", color:"#00548E", plans:["Medicare Part A","Medicare Part B","Medicare Advantage","Medigap"] },
-  { name:"Humana", color:"#39B54A", plans:["Humana PPO","Humana HMO","Humana Gold Plus","Humana Medicare Advantage"] },
-  { name:"Kaiser Permanente", color:"#006BA6", plans:["Kaiser HMO","Kaiser Medicare"] },
-  { name:"Anthem", color:"#0033A0", plans:["Anthem PPO","Anthem HMO","Anthem Blue Access"] },
-  { name:"Tricare", color:"#003F72", plans:["Tricare Prime","Tricare Select","Tricare for Life"] },
-  { name:"Oscar Health", color:"#FF6600", plans:["Oscar PPO","Oscar EPO"] },
-  { name:"Molina", color:"#8DC63F", plans:["Molina Marketplace","Molina Medicaid"] },
-  { name:"Medicaid", color:"#5C7A29", plans:["Medicaid Managed Care","Medicaid Fee-for-Service"] },
-];
-
-function HomeInsuranceList() {
-  const [expanded, setExpanded] = useState(null);
-  const [showAll, setShowAll] = useState(false);
-  const visible = showAll ? HOME_INS_DATA : HOME_INS_DATA.slice(0, 6);
-
-  return (
-    <div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:8 }}>
-        {visible.map(carrier => (
-          <div key={carrier.name} style={{ background:C.white, border:`1px solid ${expanded===carrier.name?C.teal+"40":C.border}`, borderRadius:12, overflow:"hidden", transition:"border-color .15s" }}>
-            <button onClick={()=>setExpanded(expanded===carrier.name?null:carrier.name)}
-              style={{ width:"100%", display:"flex", alignItems:"center", gap:10, padding:"12px 14px", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
-              <div style={{ width:26, height:26, borderRadius:7, background:carrier.color, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:9, color:"#fff", flexShrink:0 }}>{carrier.name.slice(0,2).toUpperCase()}</div>
-              <div style={{ flex:1 }}>
-                <div style={{ fontWeight:600, fontSize:13.5, color:C.text }}>{carrier.name}</div>
-                <div style={{ fontSize:11, color:C.textSm }}>{carrier.plans.length} plans</div>
-              </div>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.textSm} strokeWidth="2.5" style={{ flexShrink:0, transition:"transform .2s", transform:expanded===carrier.name?"rotate(180deg)":"none" }}><polyline points="6,9 12,15 18,9"/></svg>
-            </button>
-            {expanded===carrier.name && (
-              <div className="fade-up" style={{ padding:"0 14px 12px 50px" }}>
-                {carrier.plans.map(plan=>(
-                  <div key={plan} style={{ fontSize:12.5, color:C.teal, padding:"4px 0", cursor:"pointer", fontWeight:500 }}
-                    onMouseEnter={e=>e.currentTarget.style.textDecoration="underline"}
-                    onMouseLeave={e=>e.currentTarget.style.textDecoration="none"}>{plan}</div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-      {!showAll && (
-        <button onClick={()=>setShowAll(true)} style={{ marginTop:14, background:"none", border:"none", color:C.teal, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:6 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2.5"><polyline points="6,9 12,15 18,9"/></svg>
-          See all {HOME_INS_DATA.length} carriers (1,000+ plans)
-        </button>
-      )}
-      {showAll && (
-        <button onClick={()=>setShowAll(false)} style={{ marginTop:14, background:"none", border:"none", color:C.teal, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:6 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2.5" style={{ transform:"rotate(180deg)" }}><polyline points="6,9 12,15 18,9"/></svg>
-          Show less
-        </button>
-      )}
-    </div>
-  );
-}
 
 // ─── USER PROFILE PAGE ────────────────────────────────────────────────────────
 function UserProfilePage({ setPage }) {
@@ -2256,7 +2188,7 @@ function DirectoryPage({ setPage, setSelectedProvider, bookmarks, toggleBookmark
   // Clear initialSpecialty after mount
   useEffect(() => {
     if (initialSpecialty) setInitialSpecialty("");
-  }, []);
+  }, [initialSpecialty, setInitialSpecialty]);
 
   let filtered = PROVIDERS.filter(p =>
     (specialty === "All" || p.specialty === specialty || p.tags.includes(specialty)) &&
@@ -2954,7 +2886,6 @@ const DEMO_REVIEWS = [
 
 function ProviderProfilePage({ provider, onBack, bookmarks, toggleBookmark, isLoggedIn, setPage, setBookings }) {
   const [showBooking, setShowBooking] = useState(false);
-  const [tab, setTab] = useState("calendar");
   const [form, setForm] = useState({ name:"",email:"",phone:"",reason:"",time:"" });
   const [selectedDate, setSelectedDate] = useState(null);
   const [done, setDone] = useState(false);
