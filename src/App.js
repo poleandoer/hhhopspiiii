@@ -2885,7 +2885,7 @@ const DEMO_REVIEWS = [
 ];
 
 function ProviderProfilePage({ provider, onBack, bookmarks, toggleBookmark, isLoggedIn, setPage, setBookings }) {
-  const [showBooking, setShowBooking] = useState(false);
+  const [, setShowBooking] = useState(false);
   const [form, setForm] = useState({ name:"",email:"",phone:"",reason:"",time:"" });
   const [selectedDate, setSelectedDate] = useState(null);
   const [done, setDone] = useState(false);
