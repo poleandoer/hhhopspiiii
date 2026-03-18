@@ -1209,13 +1209,6 @@ function UserProfilePage({ setPage }) {
           </div>
         </div>
 
-        {/* Insurance */}
-        <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:16, padding:"24px", marginBottom:24, boxShadow:"0 1px 6px rgba(0,0,0,.04)" }}>
-          <h2 style={{ fontWeight:700, fontSize:16, marginBottom:18 }}>Insurance</h2>
-          <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:5 }}>Insurance Carrier</label>
-          <InsurancePicker value={profile.insurance} onChange={v=>setProfile(p=>({...p,insurance:v}))} />
-        </div>
-
         {/* Save */}
         <div style={{ display:"flex", gap:12, alignItems:"center" }}>
           <button onClick={handleSave} className="btn-primary" style={{ background:C.teal, color:"#fff", border:"none", borderRadius:12, padding:"13px 36px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit" }}>Save Changes</button>
@@ -1250,7 +1243,7 @@ function AccountTab({ role }) {
   };
 
   return (
-    <div style={{ maxWidth:600, display:"grid", gap:16 }}>
+    <div style={{ maxWidth:600, margin:"0 auto", display:"grid", gap:16 }}>
       {/* Personal Info */}
       <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"24px 26px" }}>
         <h3 style={{ fontWeight:700, fontSize:16, marginBottom:18 }}>Account Information</h3>
@@ -4053,12 +4046,14 @@ function ProviderDashboard({ tab, setTab }) {
 
   return (
     <div style={{ maxWidth:980, margin:"0 auto", padding:"24px 16px" }}>
+      {tab!=="account" && (
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:22, flexWrap:"wrap", gap:12 }}>
         <div>
           <h1 style={{ fontSize:20, fontWeight:800 }}>Provider Dashboard</h1>
           <p style={{ color:C.textSm, fontSize:13, marginTop:2 }}>Glow Medical Spa · Partner</p>
         </div>
       </div>
+      )}
       {tab==="overview"&&(
         <>
           <div className="dash-stats" style={{ display:"grid", gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(auto-fit, minmax(150px, 1fr))", gap:10, marginBottom:16 }}>
@@ -4208,12 +4203,14 @@ function FacilitatorDashboard({ tab, setTab }) {
 
   return (
     <div style={{ maxWidth:1040, margin:"0 auto", padding:"24px 16px" }}>
+      {tab!=="account" && (
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:22, flexWrap:"wrap", gap:12 }}>
         <div>
           <h1 style={{ fontSize:20, fontWeight:800 }}>Facilitator Dashboard</h1>
           <p style={{ color:C.textSm, fontSize:13, marginTop:2 }}>MedTravel Facilitators · Partner</p>
         </div>
       </div>
+      )}
 
       {tab==="overview"&&(
         <>
