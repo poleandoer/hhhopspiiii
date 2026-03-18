@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import imgAiHealth  from "./images/ai-health.png";
+import imgProviders from "./images/providers.png";
+import imgTourism   from "./images/tourism.png";
 import imgAiAvatar  from "./images/ai-avatar.png";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
@@ -75,7 +78,10 @@ const PROVIDERS = [
   { id:1, name:"Dr. Sarah Mitchell", specialty:"Family Medicine", rating:4.8, reviews:312, distance:0.8, city:"New York", address:"120 E 36th St", hours:"Mon–Fri 9–5", phone:"+1 212-555-0192", image:"SM", photo:"https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face", tags:["Family Medicine","Preventive Care"], contracted:true, hasCalendar:true },
   { id:2, name:"Dr. James Okafor", specialty:"Cardiology", rating:4.9, reviews:187, distance:1.2, city:"New York", address:"340 E 72nd St", hours:"Tue–Sat 10–6", phone:"+1 212-555-0234", image:"JO", photo:"https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face", tags:["Cardiology","Internal Medicine"], contracted:true, hasCalendar:true },
   { id:3, name:"Dr. Elena Vasquez", specialty:"Dermatology", rating:4.7, reviews:421, distance:2.1, city:"Los Angeles", address:"8635 W 3rd St, Ste 200", hours:"Mon–Thu 8–4", phone:"+1 310-555-0311", image:"EV", photo:"https://images.unsplash.com/photo-1594824476967-48c8b964ac31?w=150&h=150&fit=crop&crop=face", tags:["Dermatology","Cosmetic"], contracted:false, hasCalendar:false },
-  { id:4, name:"Glow Medical Spa", specialty:"Medical Aesthetics", rating:4.6, reviews:530, distance:1.5, city:"Miami", address:"1395 Brickell Ave, Ste 800", hours:"Daily 10–7", phone:"+1 305-555-0445", image:"GM", photo:"https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=150&h=150&fit=crop&crop=face", tags:["Botox","Injectables","Skin Care"], contracted:true, hasCalendar:true },
+  { id:4, name:"Glow Medical Spa", specialty:"Medical Aesthetics", rating:4.6, reviews:530, distance:1.5, city:"Miami", address:"1395 Brickell Ave, Ste 800", hours:"Daily 10–7", phone:"+1 305-555-0445", image:"GM", photo:"https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=150&h=150&fit=crop&crop=face", tags:["Botox","Injectables","Skin Care"], contracted:true, hasCalendar:true, branches:[
+    { id:"4a", name:"Glow Medical Spa — Brickell", address:"1395 Brickell Ave, Ste 800", city:"Miami, FL", phone:"+1 305-555-0445", hours:"Daily 10–7", rating:4.6, reviews:340 },
+    { id:"4b", name:"Glow Medical Spa — Wynwood", address:"2520 NW 2nd Ave", city:"Miami, FL", phone:"+1 305-555-0446", hours:"Mon–Sat 9–6", rating:4.5, reviews:190 },
+  ] },
   { id:5, name:"Dr. Amir Patel", specialty:"Orthopedics", rating:4.5, reviews:203, distance:3.4, city:"Chicago", address:"680 N Lake Shore Dr", hours:"Mon–Fri 8–3", phone:"+1 312-555-0678", image:"AP", photo:"https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&h=150&fit=crop&crop=face", tags:["Orthopedics","Sports Medicine"], contracted:true, hasCalendar:false },
   { id:6, name:"Dr. Priya Sharma", specialty:"Cardiology", rating:4.3, reviews:156, distance:4.2, city:"Houston", address:"6624 Fannin St", hours:"MWF 9–4", phone:"+1 713-555-0789", image:"PS", photo:"https://images.unsplash.com/photo-1651008376811-b90baee60c1f?w=150&h=150&fit=crop&crop=face", tags:["Cardiology","Echocardiography"], contracted:false, hasCalendar:false },
   { id:7, name:"CityHealth Clinic", specialty:"Family Medicine", rating:4.2, reviews:89, distance:5.1, city:"Los Angeles", address:"4835 Van Nuys Blvd, Ste 105", hours:"Daily 8–8", phone:"+1 818-555-0890", image:"CH", photo:"https://images.unsplash.com/photo-1666214280557-091e285b2bba?w=150&h=150&fit=crop&crop=face", tags:["Family Medicine","Walk-in"], contracted:false, hasCalendar:false },
@@ -471,38 +477,21 @@ function FieldInput({ label, type, value, onChange, placeholder, hint, right }) 
 // Role Selector
 function RoleSelector({ role, setRole }) {
   const roles = [
-    {
-      val: "patient",
-      label: "Patient",
-      desc: "Find care, book appointments, explore options abroad",
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-        </svg>
-      ),
-    },
-    {
-      val: "provider",
-      label: "Provider/Facilitator",
-      desc: "List your clinic, accept bookings, grow your practice",
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-        </svg>
-      ),
-    },
+    { val:"patient", label:"Patient", desc:"Find care & book appointments", icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>, color:C.teal, bg:C.tealLt },
+    { val:"provider", label:"Provider", desc:"List your clinic & manage leads", icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>, color:C.teal, bg:C.tealLt },
+    { val:"facilitator", label:"Facilitator", desc:"Manage international patient leads", icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>, color:C.purple, bg:C.purpleLt },
   ];
   return (
-    <div style={{ display:"flex", gap:12, marginBottom:22 }}>
+    <div style={{ display:"flex", gap:10, marginBottom:22 }}>
       {roles.map(r => (
         <button key={r.val} onClick={()=>setRole(r.val)}
-          style={{ flex:1, padding:"18px 12px 16px", border:`2px solid ${role===r.val?C.teal:C.border}`, borderRadius:16, background:role===r.val?C.tealLt:C.white, cursor:"pointer", fontFamily:"inherit", transition:"all .18s", display:"flex", flexDirection:"column", alignItems:"center", gap:10, textAlign:"center" }}>
-          <div style={{ width:44, height:44, borderRadius:"50%", background:role===r.val?C.white:C.gray, display:"flex", alignItems:"center", justifyContent:"center", color:role===r.val?C.teal:C.textSm, transition:"all .18s" }}>
+          style={{ flex:1, padding:"16px 10px 14px", border:`2px solid ${role===r.val?r.color:C.border}`, borderRadius:14, background:role===r.val?r.bg:C.white, cursor:"pointer", fontFamily:"inherit", transition:"all .18s", display:"flex", flexDirection:"column", alignItems:"center", gap:8, textAlign:"center" }}>
+          <div style={{ width:40, height:40, borderRadius:"50%", background:role===r.val?C.white:C.gray, display:"flex", alignItems:"center", justifyContent:"center", color:role===r.val?r.color:C.textSm, transition:"all .18s" }}>
             {r.icon}
           </div>
           <div>
-            <div style={{ fontSize:13.5, fontWeight:700, color:role===r.val?C.teal:C.text, marginBottom:4 }}>{r.label}</div>
-            <div style={{ fontSize:11.5, color:C.textSm, lineHeight:1.5 }}>{r.desc}</div>
+            <div style={{ fontSize:13, fontWeight:700, color:role===r.val?r.color:C.text, marginBottom:3 }}>{r.label}</div>
+            <div style={{ fontSize:10.5, color:C.textSm, lineHeight:1.4 }}>{r.desc}</div>
           </div>
         </button>
       ))}
@@ -516,28 +505,32 @@ function LoginPage({ setPage, onLogin }) {
   const [show, setShow] = useState(false);
   return (
     <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
-      <div className="fade-up" style={{ width:"100%", maxWidth:400, background:C.white, borderRadius:20, padding:"36px 30px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
+      <div className="fade-up" style={{ width:"100%", maxWidth:440, background:C.white, borderRadius:20, padding:"36px 30px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
         <div style={{ textAlign:"center", marginBottom:24 }}>
           <h2 style={{ fontSize:22, fontWeight:800, color:C.text, marginBottom:4 }}>Sign In</h2>
           <p style={{ color:C.textSm, fontSize:13 }}>Sign in to your Hospital.com account</p>
         </div>
-        <div style={{ display:"flex", gap:10, marginBottom:24 }}>
-          {[{val:"patient",label:"Patient"},{val:"provider",label:"Provider/Facilitator"}].map(r=>(
-            <button key={r.val} onClick={()=>setRole(r.val)} style={{ flex:1, padding:"12px 10px", border:`2px solid ${role===r.val?C.teal:C.border}`, borderRadius:50, background:role===r.val?C.tealLt:C.white, cursor:"pointer", fontFamily:"inherit", transition:"all .18s", fontSize:13.5, fontWeight:700, color:role===r.val?C.teal:C.textMd }}>
+        <div style={{ display:"flex", gap:8, marginBottom:22 }}>
+          {[{val:"patient",label:"Patient"},{val:"provider",label:"Provider"},{val:"facilitator",label:"Facilitator"}].map(r=>(
+            <button key={r.val} onClick={()=>setRole(r.val)} style={{ flex:1, padding:"10px 8px", border:`2px solid ${role===r.val?(r.val==="facilitator"?C.purple:C.teal):C.border}`, borderRadius:50, background:role===r.val?(r.val==="facilitator"?C.purpleLt:C.tealLt):C.white, cursor:"pointer", fontFamily:"inherit", transition:"all .18s", fontSize:13, fontWeight:700, color:role===r.val?(r.val==="facilitator"?C.purple:C.teal):C.textMd }}>
               {r.label}
             </button>
           ))}
         </div>
-        <SocialBtn letter="G" label="Continue with Google" />
-        <SocialBtn letter="A" label="Continue with Apple" />
-        <div style={{ display:"flex", alignItems:"center", gap:10, margin:"14px 0" }}>
-          <div style={{ flex:1, height:1, background:C.border }}/><span style={{ fontSize:11, color:C.textSm, fontWeight:600, whiteSpace:"nowrap" }}>or with email</span><div style={{ flex:1, height:1, background:C.border }}/>
-        </div>
+        {role==="patient" && (
+          <>
+            <SocialBtn letter="G" label="Continue with Google" />
+            <SocialBtn letter="A" label="Continue with Apple" />
+            <div style={{ display:"flex", alignItems:"center", gap:10, margin:"14px 0" }}>
+              <div style={{ flex:1, height:1, background:C.border }}/><span style={{ fontSize:11, color:C.textSm, fontWeight:600, whiteSpace:"nowrap" }}>or with email</span><div style={{ flex:1, height:1, background:C.border }}/>
+            </div>
+          </>
+        )}
         <FieldInput label="Email" type="email" value={f.email} onChange={e=>setF(p=>({...p,email:e.target.value}))} placeholder="you@example.com" />
         <FieldInput label="Password" type={show?"text":"password"} value={f.pw} onChange={e=>setF(p=>({...p,pw:e.target.value}))} placeholder="••••••••"
           hint={<button onClick={()=>{}} style={{ background:"none", border:"none", fontSize:12, color:C.teal, cursor:"pointer", fontWeight:600, fontFamily:"inherit" }}>Forgot?</button>}
           right={<button onClick={()=>setShow(s=>!s)} style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", fontSize:11, color:C.textSm, fontWeight:700, fontFamily:"inherit" }}>{show?"Hide":"Show"}</button>} />
-        <button className="btn-primary" onClick={()=>{onLogin();setPage("home");}} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"13px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Sign In as {role==="patient"?"Patient":"Provider"}</button>
+        <button className="btn-primary" onClick={()=>{onLogin();setPage("home");}} style={{ width:"100%", background:role==="facilitator"?C.purple:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"13px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Sign In as {role==="patient"?"Patient":role==="provider"?"Provider":"Facilitator"}</button>
         <p style={{ textAlign:"center", fontSize:13, color:C.textSm, marginTop:18 }}>No account?{" "}<button onClick={()=>setPage("signup")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>Sign Up</button></p>
       </div>
     </div>
@@ -550,19 +543,21 @@ function SignupPage({ setPage, onLogin }) {
   const [f, setF] = useState({ name:"", email:"", pw:"" });
   const [show, setShow] = useState(false);
   const [pf, setPf] = useState({ clinicName:"", specialty:"", location:"", email:"", phone:"" });
+  const [ff, setFf] = useState({ orgName:"", name:"", email:"", phone:"", comments:"" });
   const [providerDone, setProviderDone] = useState(false);
+  const [facilitatorDone, setFacilitatorDone] = useState(false);
 
   if (step === 0) {
     return (
       <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
-        <div className="fade-up" style={{ width:"100%", maxWidth:420, background:C.white, borderRadius:22, padding:"36px 28px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
+        <div className="fade-up" style={{ width:"100%", maxWidth:480, background:C.white, borderRadius:22, padding:"36px 28px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
           <div style={{ textAlign:"center", marginBottom:26 }}>
             <h2 style={{ fontSize:22, fontWeight:800, color:C.text, marginBottom:6 }}>Create your account</h2>
             <p style={{ color:C.textSm, fontSize:13.5 }}>Who are you signing up as?</p>
           </div>
           <RoleSelector role={role} setRole={setRole}/>
-          <button className="btn-primary" onClick={()=>setStep(1)} style={{ width:"100%", background:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"14px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>
-            Continue as {role==="patient"?"Patient":"Provider"}
+          <button className="btn-primary" onClick={()=>setStep(1)} style={{ width:"100%", background:role==="facilitator"?C.purple:C.teal, color:"#fff", border:"none", borderRadius:50, padding:"14px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>
+            Continue as {role==="patient"?"Patient":role==="provider"?"Provider":"Facilitator"}
           </button>
           <p style={{ textAlign:"center", fontSize:13, color:C.textSm, marginTop:16 }}>Already have an account?{" "}<button onClick={()=>setPage("login")} style={{ background:"none", border:"none", color:C.teal, fontWeight:700, cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>Sign In</button></p>
         </div>
@@ -570,25 +565,58 @@ function SignupPage({ setPage, onLogin }) {
     );
   }
 
-  if (role === "provider" && providerDone) {
+  // Provider/Facilitator done state
+  if ((role==="provider"&&providerDone)||(role==="facilitator"&&facilitatorDone)) {
     return (
       <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
         <div className="fade-up" style={{ width:"100%", maxWidth:460, background:C.white, borderRadius:20, padding:"40px 34px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)", textAlign:"center" }}>
-          <div style={{ width:56, height:56, borderRadius:"50%", background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px" }}>
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+          <div style={{ width:56, height:56, borderRadius:"50%", background:role==="facilitator"?C.purpleLt:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px" }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={role==="facilitator"?C.purple:C.teal} strokeWidth="2.5"><polyline points="20,6 9,17 4,12"/></svg>
           </div>
           <h2 style={{ fontSize:21, fontWeight:800, marginBottom:10 }}>Application Submitted!</h2>
-          <p style={{ color:C.textSm, fontSize:14, lineHeight:1.6, marginBottom:22 }}>Thank you for your interest in joining Hospital.com as a provider. Our admin team will review your application and your profile will go live once approved.</p>
+          <p style={{ color:C.textSm, fontSize:14, lineHeight:1.6, marginBottom:22 }}>Thank you for your interest in joining Hospital.com as a {role}. Our admin team will review your application and notify you once approved.</p>
           <div style={{ background:C.amberLt, border:`1px solid #FDE68A`, borderRadius:12, padding:"13px 16px", marginBottom:24, textAlign:"left" }}>
             <div style={{ fontSize:12, fontWeight:700, color:"#92400E", marginBottom:4 }}>Pending Admin Review</div>
             <div style={{ fontSize:13, color:"#78350F" }}>You will be notified by email once your account is approved. This typically takes 1–2 business days.</div>
           </div>
-          <button className="btn-primary" onClick={()=>setPage("home")} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:10, padding:"11px 32px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit" }}>Back to Home</button>
+          <button className="btn-primary" onClick={()=>setPage("home")} style={{ background:role==="facilitator"?C.purple:C.teal, color:"#fff", border:"none", borderRadius:10, padding:"11px 32px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit" }}>Back to Home</button>
         </div>
       </div>
     );
   }
 
+  // Facilitator form
+  if (role==="facilitator") {
+    return (
+      <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
+        <div className="fade-up" style={{ width:"100%", maxWidth:460, background:C.white, borderRadius:20, padding:"36px 30px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
+          <button onClick={()=>setStep(0)} style={{ background:"none", border:"none", cursor:"pointer", color:C.textSm, fontSize:13, fontWeight:600, fontFamily:"inherit", display:"flex", alignItems:"center", gap:6, marginBottom:20, padding:0 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15,18 9,12 15,6"/></svg>
+            Back
+          </button>
+          <div style={{ textAlign:"center", marginBottom:22 }}>
+            <h2 style={{ fontSize:20, fontWeight:800, color:C.text, marginBottom:4 }}>Facilitator Registration</h2>
+            <p style={{ color:C.textSm, fontSize:13 }}>Tell us about your organization</p>
+          </div>
+          <FieldInput label="Organization Name *" type="text" value={ff.orgName} onChange={e=>setFf(p=>({...p,orgName:e.target.value}))} placeholder="e.g. MedTravel Facilitators" />
+          <FieldInput label="Your Name *" type="text" value={ff.name} onChange={e=>setFf(p=>({...p,name:e.target.value}))} placeholder="Full name" />
+          <FieldInput label="Email *" type="email" value={ff.email} onChange={e=>setFf(p=>({...p,email:e.target.value}))} placeholder="org@example.com" />
+          <FieldInput label="Phone *" type="tel" value={ff.phone} onChange={e=>setFf(p=>({...p,phone:e.target.value}))} placeholder="+1 000-000-0000" />
+          <div style={{ marginBottom:14 }}>
+            <label style={{ fontSize:12, fontWeight:700, color:C.text, display:"block", marginBottom:5 }}>Comments / Additional Info</label>
+            <textarea value={ff.comments} onChange={e=>setFf(p=>({...p,comments:e.target.value}))} placeholder="Tell us about your services, countries you operate in, types of patients you work with…" rows={4}
+              style={{ width:"100%", padding:"10px 13px", border:`1.5px solid ${C.border}`, borderRadius:9, fontSize:14, outline:"none", fontFamily:"inherit", resize:"vertical" }} />
+          </div>
+          <div style={{ background:C.purpleLt, border:`1px solid ${C.purple}30`, borderRadius:10, padding:"11px 14px", marginBottom:16, fontSize:12.5, color:C.purple }}>
+            Facilitator accounts require admin approval before going live.
+          </div>
+          <button className="btn-primary" onClick={()=>setFacilitatorDone(true)} style={{ width:"100%", background:C.purple, color:"#fff", border:"none", borderRadius:50, padding:"13px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit", marginTop:4 }}>Submit for Review</button>
+        </div>
+      </div>
+    );
+  }
+
+  // Provider form
   if (role === "provider") {
     return (
       <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
@@ -615,6 +643,7 @@ function SignupPage({ setPage, onLogin }) {
     );
   }
 
+  // Patient form
   return (
     <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", alignItems:"center", justifyContent:"center", padding:"32px 16px", background:`linear-gradient(150deg, ${C.offWhite} 55%, ${C.tealBg})` }}>
       <div className="fade-up" style={{ width:"100%", maxWidth:400, background:C.white, borderRadius:20, padding:"36px 30px", boxShadow:"0 8px 40px rgba(11,191,191,.1), 0 2px 8px rgba(0,0,0,.06)" }}>
@@ -1078,6 +1107,9 @@ const HOME_PROCEDURES = [
   "Teeth Cleaning","Annual Checkup","Skin Exam","Eye Exam","Physical Therapy","Botox","Blood Work","Allergy Testing","Colonoscopy","Knee Replacement","Hair Transplant","LASIK"
 ];
 
+const HOME_INSURANCE = [
+  "Aetna","Blue Cross Blue Shield","Cigna","UnitedHealthcare","Humana","Kaiser Permanente","Medicare","Medicaid"
+];
 
 const HOME_REASONS = [
   { icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, title:"Verified Providers", desc:"Every provider is credentialed and reviewed by real patients." },
@@ -1086,8 +1118,68 @@ const HOME_REASONS = [
   { icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, title:"AI Health Assistant", desc:"Get instant guidance on symptoms and find the right specialist with AI." },
 ];
 
-// ─── HOME INSURANCE LIST ────────────────────────────────────────────────────
+// ─── HOME INSURANCE LIST ─────────────────────────────────────────────────────
+const HOME_INS_DATA = [
+  { name:"Aetna", color:"#7B2D8E", plans:["Aetna Choice POS II","Aetna HMO","Aetna PPO","Aetna Medicare Advantage","Aetna Open Access"] },
+  { name:"BlueCross BlueShield", color:"#0073CF", plans:["BCBS PPO","BCBS HMO","BCBS Blue Card","BCBS Federal","BCBS Medicare Supplement"] },
+  { name:"Cigna", color:"#E87722", plans:["Cigna PPO","Cigna HMO","Cigna Open Access Plus","Cigna EPO","Cigna Medicare Advantage"] },
+  { name:"UnitedHealthcare", color:"#002677", plans:["UHC Choice Plus","UHC Navigate","UHC Options PPO","UHC Medicare Advantage","UHC Dual Complete"] },
+  { name:"Medicare", color:"#00548E", plans:["Medicare Part A","Medicare Part B","Medicare Advantage","Medigap"] },
+  { name:"Humana", color:"#39B54A", plans:["Humana PPO","Humana HMO","Humana Gold Plus","Humana Medicare Advantage"] },
+  { name:"Kaiser Permanente", color:"#006BA6", plans:["Kaiser HMO","Kaiser Medicare"] },
+  { name:"Anthem", color:"#0033A0", plans:["Anthem PPO","Anthem HMO","Anthem Blue Access"] },
+  { name:"Tricare", color:"#003F72", plans:["Tricare Prime","Tricare Select","Tricare for Life"] },
+  { name:"Oscar Health", color:"#FF6600", plans:["Oscar PPO","Oscar EPO"] },
+  { name:"Molina", color:"#8DC63F", plans:["Molina Marketplace","Molina Medicaid"] },
+  { name:"Medicaid", color:"#5C7A29", plans:["Medicaid Managed Care","Medicaid Fee-for-Service"] },
+];
 
+function HomeInsuranceList() {
+  const [expanded, setExpanded] = useState(null);
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? HOME_INS_DATA : HOME_INS_DATA.slice(0, 6);
+
+  return (
+    <div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:8 }}>
+        {visible.map(carrier => (
+          <div key={carrier.name} style={{ background:C.white, border:`1px solid ${expanded===carrier.name?C.teal+"40":C.border}`, borderRadius:12, overflow:"hidden", transition:"border-color .15s" }}>
+            <button onClick={()=>setExpanded(expanded===carrier.name?null:carrier.name)}
+              style={{ width:"100%", display:"flex", alignItems:"center", gap:10, padding:"12px 14px", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
+              <div style={{ width:26, height:26, borderRadius:7, background:carrier.color, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:9, color:"#fff", flexShrink:0 }}>{carrier.name.slice(0,2).toUpperCase()}</div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontWeight:600, fontSize:13.5, color:C.text }}>{carrier.name}</div>
+                <div style={{ fontSize:11, color:C.textSm }}>{carrier.plans.length} plans</div>
+              </div>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.textSm} strokeWidth="2.5" style={{ flexShrink:0, transition:"transform .2s", transform:expanded===carrier.name?"rotate(180deg)":"none" }}><polyline points="6,9 12,15 18,9"/></svg>
+            </button>
+            {expanded===carrier.name && (
+              <div className="fade-up" style={{ padding:"0 14px 12px 50px" }}>
+                {carrier.plans.map(plan=>(
+                  <div key={plan} style={{ fontSize:12.5, color:C.teal, padding:"4px 0", cursor:"pointer", fontWeight:500 }}
+                    onMouseEnter={e=>e.currentTarget.style.textDecoration="underline"}
+                    onMouseLeave={e=>e.currentTarget.style.textDecoration="none"}>{plan}</div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      {!showAll && (
+        <button onClick={()=>setShowAll(true)} style={{ marginTop:14, background:"none", border:"none", color:C.teal, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:6 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2.5"><polyline points="6,9 12,15 18,9"/></svg>
+          See all {HOME_INS_DATA.length} carriers (1,000+ plans)
+        </button>
+      )}
+      {showAll && (
+        <button onClick={()=>setShowAll(false)} style={{ marginTop:14, background:"none", border:"none", color:C.teal, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:6 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2.5" style={{ transform:"rotate(180deg)" }}><polyline points="6,9 12,15 18,9"/></svg>
+          Show less
+        </button>
+      )}
+    </div>
+  );
+}
 
 // ─── USER PROFILE PAGE ────────────────────────────────────────────────────────
 function UserProfilePage({ setPage }) {
@@ -1226,7 +1318,7 @@ function AccountTab({ role }) {
   };
 
   return (
-    <div style={{ maxWidth:600, display:"grid", gap:16, margin:"0 auto" }}>
+    <div style={{ maxWidth:600, display:"grid", gap:16 }}>
       {/* Personal Info */}
       <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"24px 26px" }}>
         <h3 style={{ fontWeight:700, fontSize:16, marginBottom:18 }}>Account Information</h3>
@@ -1596,7 +1688,7 @@ function HomePage({ setPage, setInitialQuery, setInitialSpecialty, openProviderP
         <div style={{ maxWidth:1100, margin:"0 auto" }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
             <div style={{ fontWeight:700, fontSize:isMobile?16:20 }}>Top-rated specialists</div>
-            <button onClick={()=>setPage("directory")} style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>View all </button>
+            <button onClick={()=>setPage("directory")} style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>View all →</button>
           </div>
           <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(3, 1fr)", gap:14 }}>
             {PROVIDERS.filter(p=>p.rating>=4.7).slice(0,3).map(p=>(
@@ -1621,7 +1713,7 @@ function HomePage({ setPage, setInitialQuery, setInitialSpecialty, openProviderP
         <div style={{ maxWidth:1100, margin:"0 auto" }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
             <div style={{ fontWeight:700, fontSize:isMobile?16:20 }}>Top-rated clinics worldwide</div>
-            <button onClick={()=>setPage("international")} style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Explore </button>
+            <button onClick={()=>setPage("international")} style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Explore →</button>
           </div>
           <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(3, 1fr)", gap:14 }}>
             {INTL_CLINICS.filter(c=>c.rating>=4.8).slice(0,3).map(c=>(
@@ -2162,6 +2254,9 @@ function DirectoryPage({ setPage, setSelectedProvider, bookmarks, toggleBookmark
   const isMobile = useIsMobile();
 
   // Clear initialSpecialty after mount
+  useEffect(() => {
+    if (initialSpecialty) setInitialSpecialty("");
+  }, []);
 
   let filtered = PROVIDERS.filter(p =>
     (specialty === "All" || p.specialty === specialty || p.tags.includes(specialty)) &&
@@ -2642,6 +2737,9 @@ function InternationalPage({ setSelectedClinic, openFacilitatorModal }) {
         <div style={{ maxWidth:960, margin:"0 auto", display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1px 1fr", gap:isMobile?24:40 }}>
           <div>
             <div style={{ fontWeight:700, fontSize:isMobile?16:18, marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
+              <div style={{ width:28, height:28, borderRadius:8, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
+              </div>
               Popular Specialties
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"4px 20px" }}>
@@ -2655,6 +2753,9 @@ function InternationalPage({ setSelectedClinic, openFacilitatorModal }) {
           {!isMobile && <div style={{ background:C.border, width:1 }} />}
           <div>
             <div style={{ fontWeight:700, fontSize:isMobile?16:18, marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
+              <div style={{ width:28, height:28, borderRadius:8, background:C.purpleLt, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.purple} strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </div>
               Popular Procedures
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"4px 20px" }}>
@@ -2852,11 +2953,12 @@ const DEMO_REVIEWS = [
 ];
 
 function ProviderProfilePage({ provider, onBack, bookmarks, toggleBookmark, isLoggedIn, setPage, setBookings }) {
-  const [setShowBooking] = useState(false);
+  const [showBooking, setShowBooking] = useState(false);
+  const [tab, setTab] = useState("calendar");
   const [form, setForm] = useState({ name:"",email:"",phone:"",reason:"",time:"" });
   const [selectedDate, setSelectedDate] = useState(null);
   const [done, setDone] = useState(false);
-  const [commentText, setCommentText] = useState(""); 
+  const [commentText, setCommentText] = useState("");
   const [commentRating, setCommentRating] = useState(0);
   const [comments, setComments] = useState(DEMO_REVIEWS);
   const [commentDone, setCommentDone] = useState(false);
@@ -3141,7 +3243,7 @@ function ProviderProfilePage({ provider, onBack, bookmarks, toggleBookmark, isLo
                 <div>
                   <div style={{ fontWeight:700, fontSize:14, marginBottom:4 }}>{provider.address}</div>
                   <div style={{ fontSize:13, color:C.textSm, marginBottom:8 }}>{provider.city}</div>
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.address+", "+provider.city)}`} target="_blank" rel="noopener noreferrer" style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit", padding:0, textDecoration:"none" }}>Get directions </a>
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.address+", "+provider.city)}`} target="_blank" rel="noopener noreferrer" style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit", padding:0, textDecoration:"none" }}>Get directions →</a>
                 </div>
               </div>
             </div>
@@ -4022,7 +4124,8 @@ function ProviderDashboard({ tab, setTab }) {
     <div style={{ maxWidth:980, margin:"0 auto", padding:"24px 16px" }}>
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:22, flexWrap:"wrap", gap:12 }}>
         <div>
-
+          <h1 style={{ fontSize:20, fontWeight:800 }}>Provider Dashboard</h1>
+          <p style={{ color:C.textSm, fontSize:13, marginTop:2 }}>Glow Medical Spa · Partner</p>
         </div>
       </div>
       {tab==="overview"&&(
@@ -4467,6 +4570,15 @@ export default function App() {
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [showFacilitatorModal, setShowFacilitatorModal] = useState(false);
   const [facilitatorClinic, setFacilitatorClinic] = useState(null);
+  const [branchPickerProvider, setBranchPickerProvider] = useState(null);
+
+  const openProviderProfileSafe = (prov) => {
+    if (prov.branches && prov.branches.length > 1) {
+      setBranchPickerProvider(prov);
+    } else {
+      setSelectedProviderProfile(prov);
+    }
+  };
 
   // Auth state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -4515,9 +4627,9 @@ export default function App() {
             />
           ) : (
             <>
-              {page==="home"&&<HomePage setPage={setPage} setInitialQuery={setInitialQuery} setInitialSpecialty={setInitialSpecialty} openProviderProfile={prov=>setSelectedProviderProfile(prov)} openClinicProfile={clinic=>setSelectedClinic(clinic)}/>}
-              {page==="chat"&&<ChatPage setPage={setPage} setSelectedProvider={openProvider} openProviderProfile={prov=>setSelectedProviderProfile(prov)} setSelectedClinic={setSelectedClinic} initialQuery={initialQuery} setInitialQuery={setInitialQuery} openFacilitatorModal={openFacilitatorModal} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn}/>}
-              {page==="directory"&&<DirectoryPage setPage={setPage} setSelectedProvider={prov=>setSelectedProviderProfile(prov)} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn} setInitialQuery={setInitialQuery} bookingsList={bookings} initialSpecialty={initialSpecialty} setInitialSpecialty={setInitialSpecialty}/>}
+              {page==="home"&&<HomePage setPage={setPage} setInitialQuery={setInitialQuery} setInitialSpecialty={setInitialSpecialty} openProviderProfile={openProviderProfileSafe} openClinicProfile={clinic=>setSelectedClinic(clinic)}/>}
+              {page==="chat"&&<ChatPage setPage={setPage} setSelectedProvider={openProvider} openProviderProfile={openProviderProfileSafe} setSelectedClinic={setSelectedClinic} initialQuery={initialQuery} setInitialQuery={setInitialQuery} openFacilitatorModal={openFacilitatorModal} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn}/>}
+              {page==="directory"&&<DirectoryPage setPage={setPage} setSelectedProvider={openProviderProfileSafe} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn} setInitialQuery={setInitialQuery} bookingsList={bookings} initialSpecialty={initialSpecialty} setInitialSpecialty={setInitialSpecialty}/>}
               {page==="facilitators"&&<FacilitatorsPage setPage={setPage} setSelectedProvider={openProvider}/>}
               {page==="international"&&<InternationalPage setSelectedClinic={setSelectedClinic} openFacilitatorModal={openFacilitatorModal}/>}
               {page==="login"&&<LoginPage setPage={setPage} onLogin={handleLogin}/>}
@@ -4527,8 +4639,49 @@ export default function App() {
           )}
         </>
       )}
-      {selectedProvider && <ProviderModal provider={selectedProvider} onClose={closeProvider} setBookings={setBookings} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn} setPage={setPage} openProviderProfile={prov=>{closeProvider();setSelectedProviderProfile(prov);}}/>}
+      {selectedProvider && <ProviderModal provider={selectedProvider} onClose={closeProvider} setBookings={setBookings} bookmarks={bookmarks} toggleBookmark={toggleBookmark} isLoggedIn={isLoggedIn} setPage={setPage} openProviderProfile={prov=>{closeProvider();openProviderProfileSafe(prov);}}/>}
       {showFacilitatorModal && <FacilitatorModal onClose={closeFacilitatorModal} clinic={facilitatorClinic}/>}
+      {branchPickerProvider && (
+        <div onClick={e=>{if(e.target===e.currentTarget)setBranchPickerProvider(null);}} style={{ position:"fixed", inset:0, background:"rgba(10,20,30,.45)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:600, padding:16, backdropFilter:"blur(3px)" }}>
+          <div className="fade-up" style={{ background:C.white, borderRadius:22, padding:"32px 28px", maxWidth:460, width:"100%", boxShadow:"0 24px 60px rgba(0,0,0,.2)" }}>
+            <div style={{ display:"flex", gap:14, alignItems:"center", marginBottom:20 }}>
+              <ProviderAvatar provider={branchPickerProvider} size={52} radius={14} fontSize={17} />
+              <div>
+                <h3 style={{ fontWeight:800, fontSize:18, margin:0 }}>{branchPickerProvider.name}</h3>
+                <p style={{ color:C.textSm, fontSize:13, marginTop:2 }}>{branchPickerProvider.branches.length} locations available</p>
+              </div>
+            </div>
+            <p style={{ fontSize:13.5, color:C.textMd, marginBottom:16, lineHeight:1.5 }}>This provider has multiple locations. Choose a branch to view:</p>
+            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+              {branchPickerProvider.branches.map(branch => (
+                <button key={branch.id} onClick={()=>{
+                  const merged = {...branchPickerProvider, ...branch, name:branch.name, address:branch.address, city:branch.city, phone:branch.phone, hours:branch.hours, rating:branch.rating, reviews:branch.reviews, parentName:branchPickerProvider.name};
+                  setBranchPickerProvider(null);
+                  setSelectedProviderProfile(merged);
+                }}
+                  style={{ display:"flex", gap:14, alignItems:"center", padding:"16px 18px", border:`1.5px solid ${C.border}`, borderRadius:14, background:C.white, cursor:"pointer", fontFamily:"inherit", textAlign:"left", transition:"all .15s" }}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor=C.teal;e.currentTarget.style.background=C.tealLt;}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.background=C.white;}}>
+                  <div style={{ width:40, height:40, borderRadius:10, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontWeight:700, fontSize:14, marginBottom:3 }}>{branch.name}</div>
+                    <div style={{ fontSize:12.5, color:C.textSm }}>{branch.address}, {branch.city}</div>
+                    <div style={{ display:"flex", gap:8, marginTop:4, fontSize:12, color:C.textSm }}>
+                      <span style={{ color:C.amber, fontWeight:600 }}>★ {branch.rating}</span>
+                      <span>({branch.reviews} reviews)</span>
+                      <span>· {branch.hours}</span>
+                    </div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.textSm} strokeWidth="2.5" style={{ flexShrink:0 }}><polyline points="9,18 15,12 9,6"/></svg>
+                </button>
+              ))}
+            </div>
+            <button onClick={()=>setBranchPickerProvider(null)} style={{ width:"100%", marginTop:14, padding:"11px", border:`1.5px solid ${C.border}`, borderRadius:12, background:C.white, color:C.textSm, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
