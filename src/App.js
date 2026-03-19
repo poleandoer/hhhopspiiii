@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import imgAiAvatar  from "./images/ai-avatar.png";
+import imgAiHealth  from "./images/ai-health.png";
+import imgProviders from "./images/providers.png";
+import imgTourism   from "./images/tourism.png";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 const C = {
@@ -771,43 +774,7 @@ function BecomeProviderPage({ setPage }) {
         </div>
       </div>
 
-      {/* 5. PARTNER TYPES — Two Cards */}
-      <div style={{ padding:isMobile?"36px 16px":"60px 16px" }}>
-        <div style={{ maxWidth:860, margin:"0 auto", textAlign:"center" }}>
-          <h2 style={{ fontSize:isMobile?22:30, fontWeight:800, marginBottom:8 }}>Partner with Hospital.com</h2>
-          <p style={{ color:C.textSm, fontSize:isMobile?13:15, marginBottom:32 }}>Choose the partnership type that fits your practice.</p>
-          <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1fr", gap:20 }}>
-            {/* Local Providers */}
-            <div style={{ background:C.white, border:`2px solid ${C.teal}30`, borderRadius:20, padding:"32px 24px", textAlign:"left" }}>
-              <div style={{ width:48, height:48, borderRadius:14, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:16 }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
-              </div>
-              <h3 style={{ fontSize:18, fontWeight:800, marginBottom:8 }}>Local Healthcare Providers</h3>
-              <p style={{ color:C.textSm, fontSize:13.5, lineHeight:1.65, marginBottom:16 }}>Healthcare professionals and clinics looking to reach patients in their local region.</p>
-              <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:20 }}>
-                {["Dentists","Chiropractors","Physiotherapists","Dermatologists","Clinics","Medical Spas"].map(t=>(
-                  <span key={t} style={{ background:C.tealLt, color:C.teal, fontSize:11.5, fontWeight:600, padding:"4px 11px", borderRadius:10 }}>{t}</span>
-                ))}
-              </div>
-              <button className="btn-primary" onClick={()=>document.getElementById("provider-form")?.scrollIntoView({behavior:"smooth"})} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:22, padding:"11px 24px", fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:"inherit" }}>Join as Local Provider</button>
-            </div>
-            {/* Medical Tourism Partners */}
-            <div style={{ background:C.white, border:`2px solid ${C.purple}30`, borderRadius:20, padding:"32px 24px", textAlign:"left" }}>
-              <div style={{ width:48, height:48, borderRadius:14, background:C.purpleLt, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:16 }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.purple} strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              </div>
-              <h3 style={{ fontSize:18, fontWeight:800, marginBottom:8 }}>Medical Tourism Partners</h3>
-              <p style={{ color:C.textSm, fontSize:13.5, lineHeight:1.65, marginBottom:16 }}>Medical travel platforms and facilitator agencies connecting patients with international treatment options.</p>
-              <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:20 }}>
-                {["Medical Tourism Platforms","Patient Coordinators","Treatment Facilitators","Healthcare Travel Agencies"].map(t=>(
-                  <span key={t} style={{ background:C.purpleLt, color:C.purple, fontSize:11.5, fontWeight:600, padding:"4px 11px", borderRadius:10 }}>{t}</span>
-                ))}
-              </div>
-              <button className="btn-primary" onClick={()=>document.getElementById("provider-form")?.scrollIntoView({behavior:"smooth"})} style={{ background:C.purple, color:"#fff", border:"none", borderRadius:22, padding:"11px 24px", fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:"inherit" }}>Become a Tourism Partner</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* 6. PROFILE PREVIEW */}
       <div style={{ padding:isMobile?"36px 16px":"60px 16px", background:C.offWhite }}>
@@ -1085,31 +1052,6 @@ function Select({ value, onChange, options, placeholder, minWidth }) {
 }
 
 // ─── HOME PAGE DATA ──────────────────────────────────────────────────────────
-const HOME_SPECIALTIES = [
-  { icon:"🫀", label:"Cardiology" },
-  { icon:"🦷", label:"Dentistry" },
-  { icon:"🧴", label:"Dermatology" },
-  { icon:"👁", label:"Ophthalmology" },
-  { icon:"🦴", label:"Orthopedics" },
-  { icon:"🧠", label:"Psychiatry" },
-  { icon:"👶", label:"Pediatrics" },
-  { icon:"💊", label:"Family Medicine" },
-  { icon:"🏥", label:"Urgent Care" },
-  { icon:"🔬", label:"Gastroenterology" },
-  { icon:"🩺", label:"OB-GYN" },
-  { icon:"💆", label:"Medical Aesthetics" },
-];
-
-const HOME_PROCEDURES = [
-  "Teeth Cleaning","Annual Checkup","Skin Exam","Eye Exam","Physical Therapy","Botox","Blood Work","Allergy Testing","Colonoscopy","Knee Replacement","Hair Transplant","LASIK"
-];
-
-const HOME_REASONS = [
-  { icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, title:"Verified Providers", desc:"Every provider is credentialed and reviewed by real patients." },
-  { icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, title:"Book Instantly", desc:"Schedule appointments online 24/7 — no phone calls needed." },
-  { icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>, title:"Find Care Nearby", desc:"Search by specialty, insurance, and location to find the right fit." },
-  { icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, title:"AI Health Assistant", desc:"Get instant guidance on symptoms and find the right specialist with AI." },
-];
 
 // ─── HOME INSURANCE LIST ─────────────────────────────────────────────────────
 
@@ -1483,186 +1425,70 @@ function Footer({ setPage }) {
 }
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
+const FEATURE_ITEMS = [
+  { src: imgAiHealth, title:"AI Health Assistant", sub:"Science-based guidance", page:"chat" },
+  { src: imgProviders, title:"Provider Directory",  sub:"Verified specialists", page:"directory" },
+  { src: imgTourism,   title:"Medical Tourism",     sub:"Find care abroad", page:"international" },
+];
+
 function HomePage({ setPage, setInitialQuery, setInitialSpecialty, openProviderProfile, openClinicProfile }) {
   const [q, setQ] = useState("");
   const isMobile = useIsMobile();
   const send = (v) => { const t=v||q; if(!t.trim())return; setInitialQuery(t); setPage("chat"); };
-  const suggestions = ["Find a cardiologist","I have a headache","Hair transplant abroad","Sore throat remedies","Botox near me","Knee pain treatment"];
+  const suggestions = ["Find a cardiologist","I have a headache","Hair transplant abroad","Sore throat remedies"];
 
   return (
-    <div style={{ minHeight:"calc(100vh - 58px)", background:C.white }}>
-      {/* HERO — split layout, full viewport */}
-      <div style={{ background:`linear-gradient(160deg, ${C.white} 40%, ${C.tealBg} 100%)`, display:"flex", alignItems:"center", padding:isMobile?"40px 16px":"0 40px", minHeight:"calc(100vh - 58px)" }}>
-        <div style={{ maxWidth:1100, margin:"0 auto", width:"100%", display:"flex", alignItems:isMobile?"stretch":"center", flexDirection:isMobile?"column":"row", gap:isMobile?32:60 }}>
+    <div style={{ minHeight:"calc(100vh - 58px)", display:"flex", flexDirection:"column", background:`linear-gradient(155deg, ${C.white} 50%, ${C.tealBg} 100%)` }}>
+      <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:isMobile?"28px 16px 0":"40px 16px 0" }}>
+        <div className="fade-up" style={{ textAlign:"center", maxWidth:780, width:"100%", padding:"0 8px" }}>
 
-          {/* LEFT — branding + text */}
-          <div style={{ flex:1 }}>
-            <div style={{ marginBottom:isMobile?10:18 }}>
-              <span style={{ fontSize:isMobile?28:42, fontWeight:800, letterSpacing:"-.5px" }}><span style={{ color:C.teal }}>Hospital</span><span style={{ color:"#047598" }}>.com</span></span>
-            </div>
-            <h1 style={{ fontSize:isMobile?24:40, fontWeight:800, lineHeight:1.2, letterSpacing:"-.4px", marginBottom:isMobile?10:16 }}>
-              AI-powered healthcare,<br/>right at your fingertips
-            </h1>
-            <p style={{ color:C.textSm, fontSize:isMobile?14:17, lineHeight:1.6, maxWidth:440 }}>
-              Ask any health question, find specialists, or explore treatment options abroad — all in one place.
-            </p>
+          <div style={{ display:"inline-flex", alignItems:"center", gap:isMobile?7:10, marginBottom:isMobile?10:18 }}>
+            <span style={{ fontSize:isMobile?28:40, fontWeight:800, letterSpacing:"-0.5px" }}><span style={{ color:C.teal }}>Hospital</span><span style={{ color:"#047598", fontWeight:800 }}>.com</span></span>
           </div>
 
-          {/* RIGHT — search card + chips */}
-          <div style={{ flex:1, maxWidth:isMobile?"100%":520 }}>
-            <div style={{ background:C.white, borderRadius:20, padding:isMobile?"24px 20px":"36px 32px", boxShadow:"0 8px 40px rgba(0,0,0,.08)", border:`1px solid ${C.borderLt}` }}>
-              <div style={{ fontWeight:700, fontSize:isMobile?16:19, marginBottom:6 }}>How can we help you?</div>
-              <p style={{ color:C.textSm, fontSize:13, marginBottom:18 }}>Ask a health question or search for a specialist</p>
+          <p style={{ color:C.textSm, fontSize:isMobile?13:18, marginBottom:isMobile?24:36, fontWeight:500 }}>AI-powered healthcare, right at your fingertips</p>
 
-              <div style={{ position:"relative", marginBottom:16 }}>
-                <input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask me any healthcare question…"
-                  className="home-search-box"
-                  style={{ width:"100%", padding:"14px 52px 14px 18px", border:`2px solid ${C.border}`, borderRadius:14, fontSize:isMobile?14:15, outline:"none", background:C.offWhite, fontFamily:"inherit", transition:"border-color .2s" }}
-                  onFocus={e=>{e.target.style.borderColor=C.teal;e.target.style.background=C.white;}} onBlur={e=>{e.target.style.borderColor=C.border;e.target.style.background=C.offWhite;}} />
-                <button onClick={()=>send()} style={{ position:"absolute", right:8, top:"50%", transform:"translateY(-50%)", background:C.teal, border:"none", borderRadius:10, width:36, height:36, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
-                </button>
-              </div>
-
-              <div className="home-chips" style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:7 }}>
-                {suggestions.map(s=>(
-                  <button key={s} onClick={()=>send(s)} style={{ background:C.offWhite, border:`1px solid ${C.border}`, borderRadius:10, padding:"7px 10px", fontSize:11.5, color:C.textSm, cursor:"pointer", transition:"all .15s", fontFamily:"inherit", textAlign:"center" }}
-                    onMouseEnter={e=>{e.currentTarget.style.borderColor=C.teal;e.currentTarget.style.color=C.teal;e.currentTarget.style.background=C.tealLt;}}
-                    onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.color=C.textSm;e.currentTarget.style.background=C.offWhite;}}>{s}</button>
-                ))}
-              </div>
-            </div>
+          <div style={{ position:"relative", marginBottom:16 }}>
+            <input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask me any healthcare question…"
+              style={{ width:"100%", padding:isMobile?"13px 50px 13px 18px":"17px 60px 17px 24px", border:`1.5px solid ${C.border}`, borderRadius:40, fontSize:isMobile?14:16, outline:"none", boxSizing:"border-box", boxShadow:"0 4px 20px rgba(0,0,0,.09)", background:C.white, fontFamily:"inherit" }}
+              onFocus={e=>e.target.style.borderColor=C.teal} onBlur={e=>e.target.style.borderColor=C.border} />
+            <button onClick={()=>send()} style={{ position:"absolute", right:isMobile?8:10, top:"50%", transform:"translateY(-50%)", background:C.teal, border:"none", borderRadius:"50%", width:isMobile?36:42, height:isMobile?36:42, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+            </button>
           </div>
-        </div>
-      </div>
 
-      {/* ─── CONTENT SECTIONS (below hero) ─────────────────────────────────── */}
-
-      {/* WHY USE HOSPITAL.COM */}
-      <div style={{ background:C.tealBg, padding:isMobile?"28px 16px":"44px 40px" }}>
-        <div style={{ maxWidth:1100, margin:"0 auto" }}>
-          <div style={{ fontWeight:700, fontSize:isMobile?16:20, marginBottom:18 }}>Why use Hospital.com to find local care?</div>
-          <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4, 1fr)", gap:14 }}>
-            {HOME_REASONS.map(r=>(
-              <div key={r.title} style={{ background:C.white, borderRadius:14, padding:"20px 18px", boxShadow:"0 1px 6px rgba(0,0,0,.04)" }}>
-                <div style={{ width:40, height:40, borderRadius:10, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:12 }}>{r.icon}</div>
-                <div style={{ fontWeight:700, fontSize:14, marginBottom:6 }}>{r.title}</div>
-                <div style={{ color:C.textSm, fontSize:12.5, lineHeight:1.6 }}>{r.desc}</div>
-              </div>
+          <div style={{ display:"flex", gap:7, flexWrap:"wrap", justifyContent:"center", marginBottom:isMobile?20:30 }}>
+            {suggestions.map(s=>(
+              <button key={s} onClick={()=>send(s)} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:20, padding:isMobile?"5px 12px":"6px 15px", fontSize:isMobile?11:12.5, color:C.textSm, cursor:"pointer", transition:"all .15s", fontFamily:"inherit" }}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=C.teal;e.currentTarget.style.color=C.teal;}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.color=C.textSm;}}>{s}</button>
             ))}
           </div>
-        </div>
-      </div>
 
-      {/* INSURANCE PROVIDERS */}
-      <div style={{ background:C.tealBg, padding:isMobile?"28px 16px":"40px 40px" }}>
-        <div style={{ maxWidth:1100, margin:"0 auto" }}>
-          <div style={{ display:"flex", alignItems:isMobile?"flex-start":"center", justifyContent:"space-between", flexDirection:isMobile?"column":"row", gap:isMobile?12:20 }}>
-            <div>
-              <div style={{ fontWeight:700, fontSize:isMobile?16:20, marginBottom:4 }}>1,000+ insurance plans accepted</div>
-              <p style={{ color:C.textSm, fontSize:13.5 }}>We work with all major carriers so you can find in-network providers</p>
-            </div>
-            <div style={{ display:"flex", gap:8, flexWrap:"wrap", alignItems:"center" }}>
-              {[
-                {name:"Aetna", color:"#7B2D8E"},
-                {name:"BCBS", color:"#0073CF"},
-                {name:"Cigna", color:"#E87722"},
-                {name:"UHC", color:"#002677"},
-                {name:"Humana", color:"#39B54A"},
-              ].map(ins=>(
-                <div key={ins.name} style={{ display:"flex", alignItems:"center", gap:6, background:C.white, border:`1px solid ${C.border}`, borderRadius:10, padding:"8px 14px" }}>
-                  <div style={{ width:22, height:22, borderRadius:6, background:ins.color, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:8, color:"#fff" }}>{ins.name.slice(0,2)}</div>
-                  <span style={{ fontSize:12.5, fontWeight:600, color:C.textMd }}>{ins.name}</span>
+          <div style={{ display:"flex", gap:isMobile?20:40, justifyContent:"center", marginBottom:isMobile?20:30, flexWrap:"wrap" }}>
+            {FEATURE_ITEMS.map(({src,title,sub,page:pg})=>(
+              <button key={title} onClick={()=>setPage(pg)} style={{ background:"none", border:"none", cursor:"pointer", fontFamily:"inherit", display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:"8px 12px", transition:"transform .15s", textAlign:"center" }}
+                onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+                onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+                <div style={{ width:48, height:48, borderRadius:12, overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <img src={src} alt={title} style={{ width:"100%", height:"100%", objectFit:"contain" }}/>
                 </div>
-              ))}
-              <span style={{ fontSize:12.5, color:C.teal, fontWeight:700, cursor:"pointer", whiteSpace:"nowrap" }} onClick={()=>setPage("directory")}>+ 995 more</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* SPECIALTIES & PROCEDURES — side by side */}
-      <div style={{ padding:isMobile?"28px 16px":"44px 40px" }}>
-        <div style={{ maxWidth:1100, margin:"0 auto", display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1px 1fr", gap:isMobile?28:40 }}>
-          <div>
-            <div style={{ fontWeight:700, fontSize:isMobile?16:20, marginBottom:14 }}>Most popular specialties</div>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"5px 24px" }}>
-              {HOME_SPECIALTIES.map(s=>(
-                <span key={s.label} onClick={()=>{setInitialSpecialty(s.label);setPage("directory");}} style={{ fontSize:13.5, color:C.teal, cursor:"pointer", padding:"5px 0", fontWeight:500 }}
-                  onMouseEnter={e=>e.currentTarget.style.textDecoration="underline"}
-                  onMouseLeave={e=>e.currentTarget.style.textDecoration="none"}>{s.label}</span>
-              ))}
-            </div>
-          </div>
-          {!isMobile && <div style={{ background:C.border }} />}
-          <div>
-            <div style={{ fontWeight:700, fontSize:isMobile?16:20, marginBottom:14 }}>Most popular procedures</div>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"5px 24px" }}>
-              {HOME_PROCEDURES.map(p=>(
-                <span key={p} onClick={()=>send(p)} style={{ fontSize:13.5, color:C.teal, cursor:"pointer", padding:"5px 0", fontWeight:500 }}
-                  onMouseEnter={e=>e.currentTarget.style.textDecoration="underline"}
-                  onMouseLeave={e=>e.currentTarget.style.textDecoration="none"}>{p}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* TOP-RATED SPECIALISTS */}
-      <div style={{ background:C.offWhite, padding:isMobile?"28px 16px":"44px 40px", borderTop:`1px solid ${C.borderLt}` }}>
-        <div style={{ maxWidth:1100, margin:"0 auto" }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
-            <div style={{ fontWeight:700, fontSize:isMobile?16:20 }}>Top-rated specialists</div>
-            <button onClick={()=>setPage("directory")} style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>View all →</button>
-          </div>
-          <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(3, 1fr)", gap:14 }}>
-            {PROVIDERS.filter(p=>p.rating>=4.7).slice(0,3).map(p=>(
-              <div key={p.id} className="card" onClick={()=>openProviderProfile(p)} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"18px", cursor:"pointer", boxShadow:"0 1px 4px rgba(0,0,0,.04)", display:"flex", gap:14, alignItems:"center" }}>
-                <ProviderAvatar provider={p} size={48} radius={12} fontSize={15} />
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:3 }}>
-                    <span style={{ fontWeight:700, fontSize:14 }}>{p.name}</span>
-                    {p.contracted && <SealBadge small />}
-                  </div>
-                  <div style={{ color:C.textSm, fontSize:12.5 }}>{p.specialty} · {p.city}</div>
-                  <div style={{ fontSize:12, color:C.amber, fontWeight:600, marginTop:2 }}>★ {p.rating} <span style={{ color:C.textSm, fontWeight:400 }}>({p.reviews} reviews)</span></div>
-                </div>
-              </div>
+                <div style={{ fontWeight:700, fontSize:12.5, color:C.text }}>{title}</div>
+                <div style={{ fontSize:11, color:C.textSm }}>{sub}</div>
+              </button>
             ))}
           </div>
+
         </div>
       </div>
 
-      {/* TOP-RATED CLINICS */}
-      <div style={{ padding:isMobile?"28px 16px":"44px 40px" }}>
-        <div style={{ maxWidth:1100, margin:"0 auto" }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
-            <div style={{ fontWeight:700, fontSize:isMobile?16:20 }}>Top-rated clinics worldwide</div>
-            <button onClick={()=>setPage("international")} style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Explore →</button>
-          </div>
-          <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(3, 1fr)", gap:14 }}>
-            {INTL_CLINICS.filter(c=>c.rating>=4.8).slice(0,3).map(c=>(
-              <div key={c.id} className="card" onClick={()=>openClinicProfile(c)} style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"18px", cursor:"pointer", boxShadow:"0 1px 4px rgba(0,0,0,.04)", display:"flex", gap:14, alignItems:"center" }}>
-                <div style={{ width:48, height:48, borderRadius:12, background:C.purpleLt, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:15, color:C.purple, flexShrink:0 }}>{c.image}</div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontWeight:700, fontSize:14, marginBottom:3 }}>{c.name}</div>
-                  <div style={{ color:C.textSm, fontSize:12.5 }}>{c.city}, {c.country} {c.flag}</div>
-                  <div style={{ fontSize:12, color:C.amber, fontWeight:600, marginTop:2 }}>★ {c.rating} <span style={{ color:C.textSm, fontWeight:400 }}>({c.reviews} reviews)</span></div>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div style={{ background:C.gray, borderTop:`1px solid ${C.border}`, padding:isMobile?"14px 20px":"12px 40px", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
+        <div style={{ display:"flex", gap:20, alignItems:"center", flexWrap:"wrap" }}>
+          <span style={{ fontSize:12, color:C.textSm, cursor:"pointer", fontFamily:"inherit" }} onMouseEnter={e=>e.currentTarget.style.color=C.teal} onMouseLeave={e=>e.currentTarget.style.color=C.textSm}>Privacy Policy</span>
+          <span style={{ fontSize:12, color:C.textSm, cursor:"pointer", fontFamily:"inherit" }} onMouseEnter={e=>e.currentTarget.style.color=C.teal} onMouseLeave={e=>e.currentTarget.style.color=C.textSm}>Terms & Conditions</span>
         </div>
+        <button className="btn-primary" onClick={()=>setPage("become-provider")} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:20, padding:"8px 22px", fontWeight:700, fontSize:12.5, cursor:"pointer", fontFamily:"inherit" }}>Become a Provider</button>
       </div>
-
-      {/* PROVIDER CTA */}
-      <div style={{ background:`linear-gradient(135deg, #0E1C26, #1a3a4a)`, padding:isMobile?"36px 16px":"56px 40px", textAlign:"center" }}>
-        <h3 style={{ color:"#fff", fontSize:isMobile?18:26, fontWeight:800, marginBottom:10 }}>Are you a healthcare provider?</h3>
-        <p style={{ color:"#7A8FA0", fontSize:isMobile?13:16, marginBottom:24 }}>Join Hospital.com and connect with patients searching for your specialty.</p>
-        <button className="btn-primary" onClick={()=>setPage("become-provider")} style={{ background:C.teal, color:"#fff", border:"none", borderRadius:24, padding:"13px 36px", fontWeight:700, fontSize:15, cursor:"pointer", fontFamily:"inherit" }}>Become a Provider</button>
-      </div>
-
-      <Footer setPage={setPage} />
     </div>
   );
 }
@@ -2662,9 +2488,6 @@ function InternationalPage({ setSelectedClinic, openFacilitatorModal }) {
         <div style={{ maxWidth:960, margin:"0 auto", display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1px 1fr", gap:isMobile?24:40 }}>
           <div>
             <div style={{ fontWeight:700, fontSize:isMobile?16:18, marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
-              <div style={{ width:28, height:28, borderRadius:8, background:C.tealLt, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
-              </div>
               Popular Specialties
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"4px 20px" }}>
@@ -2677,10 +2500,7 @@ function InternationalPage({ setSelectedClinic, openFacilitatorModal }) {
           </div>
           {!isMobile && <div style={{ background:C.border, width:1 }} />}
           <div>
-            <div style={{ fontWeight:700, fontSize:isMobile?16:18, marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
-              <div style={{ width:28, height:28, borderRadius:8, background:C.purpleLt, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.purple} strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-              </div>
+            <div style={{ fontWeight:700, fontSize:isMobile?16:18, marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>            
               Popular Procedures
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"4px 20px" }}>
@@ -3167,7 +2987,7 @@ function ProviderProfilePage({ provider, onBack, bookmarks, toggleBookmark, isLo
                 <div>
                   <div style={{ fontWeight:700, fontSize:14, marginBottom:4 }}>{provider.address}</div>
                   <div style={{ fontSize:13, color:C.textSm, marginBottom:8 }}>{provider.city}</div>
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.address+", "+provider.city)}`} target="_blank" rel="noopener noreferrer" style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit", padding:0, textDecoration:"none" }}>Get directions →</a>
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.address+", "+provider.city)}`} target="_blank" rel="noopener noreferrer" style={{ background:"none", border:"none", color:C.teal, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:"inherit", padding:0, textDecoration:"none" }}>Get directions </a>
                 </div>
               </div>
             </div>
